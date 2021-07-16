@@ -32,7 +32,6 @@ entry:
     MOV     SP,0x7c00
     MOV     DS,AX
 ; ディスクを読む
-    MOV
     MOV     ES,AX
     MOV     SI,msg
 putloop:
@@ -57,7 +56,7 @@ msg:
     DB      0x0a            ; 改行
     DB      0
 
-    RESB    0x7dfe-$         ; 0x001feまでを0x00で埋める命令
+    RESB    0x7dfe-($-$$)         ; 0x001feまでを0x00で埋める命令
 
     DB      0x55, 0xaa
 
