@@ -26,7 +26,7 @@
  
 ; プログラム本体
 
-entry:
+entry:  
     MOV     AX,0
     MOV     SS,AX
     MOV     SP,0x7c00
@@ -40,7 +40,7 @@ putloop:
     CMP     AL,0
     JE      fin
     MOV     AH,0x0e
-    MOV     BX,15
+    MOV     BX,10
     INT     0x10
     JMP     putloop
 fin:
@@ -50,13 +50,16 @@ fin:
 ; メッセージ部分
 msg:
     DB      0x0a            ; 改行を2つ
+    DB      0x0d
     DB      "hello, world"
     DB      0x0a
+    DB      0x0d
     DB      "I am SuCicada" ;
     DB      0x0a            ; 改行
+    DB      0x0d
     DB      0
 
-    RESB    0x7dfe-($-$$)         ; 0x001feまでを0x00で埋める命令
+    RESB    510-($-$$)         ; 0x001feまでを0x00で埋める命令
 
     DB      0x55, 0xaa
 
