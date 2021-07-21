@@ -5,8 +5,7 @@ run: output/suos.img
 	qemu-system-x86_64 -drive file=$<,if=floppy
 
 output/suos.bin : suos.nas Makefile output
-	#bin/nask.exe $< $@ suos.lst
-	nasm -o $@ $<   
+	nasm -o $@ -l output/suos.lst $<   
 
 output/suos.img : output/suos.bin Makefile output
 	bin/edimg.sh $< $@
