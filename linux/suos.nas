@@ -39,7 +39,7 @@ putloop:
     ADD     SI,1
     CMP     AL,0
     JE      fin
-    MOV     AH,0x0e
+    MOV     AH,0x0e1
     MOV     BX,10
     INT     0x10
     JMP     putloop
