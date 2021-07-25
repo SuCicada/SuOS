@@ -1,21 +1,44 @@
-build: output/suos.img
+OUTPUT = output
+BIN = bin
+OUT_IMG = $(OUTPUT)/suos.img
+IMG = $(OUT_IMG)
+OUT_BIN = $(OUTPUT)/suos.bin
+OUT_LST = $(OUTPUT)/suos.lst
+OUT_FLOPPY = $(OUTPUT)/floppy.bin 
+QEMU = qemu-system-x86_64
+EDIMG = $(BIN)/edimg.sh
+TMP_DIR = /tmp/floppy
+MOUNT = sudo mount
+UMOUNT = sudo umount 
+UID = $(shell id -u)
+GID = $(shell id -g)
+build: $(IMG) copy
 	@echo over
 	
-run: output/suos.img 
-	qemu-system-x86_64 -drive file=$<,if=floppy
+run: $(IMG) copy 
+	$(QEMU) -drive file=$<,if=floppy
+copy: $(IMG)
+	mkdir -p $(TMP_DIR)
+	make mount
+	cp $(OUT_FLOPPY) $(TMP_DIR)
+	make umount
+mount: $(IMG)
+	$(MOUNT) -o loop,fat=12,uid=$(UID),gid=$(GID) $(IMG) $(TMP_DIR)
+umount:	
+	$(UMOUNT) $(TMP_DIR) 
+$(OUT_BIN) : suos.nas Makefile output
+	nasm -o $@ -l $(OUT_LST) $<   
+	nasm -o $(OUT_FLOPPY) -l $(OUTPUT)/floppy.lst floppy.nas
 
-output/suos.bin : suos.nas Makefile output
-	nasm -o $@ -l output/suos.lst $<   
+$(IMG): $(OUT_BIN)  
+	$(EDIMG) $< $@
 
-output/suos.img : output/suos.bin Makefile output
-	bin/edimg.sh $< $@
-
-output: 
-	mkdir output
+$(OUTPUT): 
+	mkdir -p $(OUTPUT)
 
 .PHONY: list
 
 list:
 	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$'
 clean:
-	@rm -r output
+	@rm -r $(OUTPUT) 
