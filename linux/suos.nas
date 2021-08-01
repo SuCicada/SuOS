@@ -75,7 +75,7 @@ next:
 
     MOV     SI,msg
     JMP     putloop
-    JMP     fin
+
 
 putloop:    
     MOV     AL,[SI]
@@ -88,8 +88,11 @@ putloop:
     JMP     putloop
 
 fin:
+    MOV     [0x0ff0],CH    
+    JMP     0xc400
+fin_loop:
     HLT                     ; 何かあるまでCPUを停止させる
-    JMP     fin
+    JMP     fin_loop
     
 error:
     MOV     SI,error_msg
