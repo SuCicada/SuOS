@@ -12,6 +12,11 @@ MOUNT = sudo mount
 UMOUNT = sudo umount 
 UID = $(shell id -u)
 GID = $(shell id -g)
+
+run_kernel:
+	nasm -o bootloader suos.nas
+	cd ./kernel;make clean;make run addr=0xc400 
+
 build: $(IMG) copy
 	@echo over
 	
