@@ -1,5 +1,5 @@
 .idea
-linux/output
+**/output
 .vscode
 *.bin
 *.img
