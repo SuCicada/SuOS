@@ -11,14 +11,14 @@ OUTPUT=output
 
 build: kernel 
 
-kernel: entry.o main.o screen.o 
+kernel: entry.o main.o screen.o func.o 
 	mv *.o *.d $(OUTPUT)
 	cd $(OUTPUT) ;\
 	ld $(LDFLAGS) -N -e start -Ttext $(addr) -o $@.out $^ ;\
 	objdump -S $@.out >$@.asm ;\
 	objcopy -S -O binary -j .text $@.out $@ 
 	
-entry.o: entry.S $(OUTPUT)
+entry.o: entry.S
 	gcc -nostdinc $(CFLAGS) -c -o $@ $<
 	# mv $@ $(OUTPUT)
 main.o: main.c
@@ -28,6 +28,8 @@ main.o: main.c
 screen.o: screen.c
 	gcc -nostdinc $(CFLAGS) -c -o $@ $<
 	# mv $@ $(OUTPUT)
+func.o: func.nas
+	nasm -g -f elf32 -o $@ $<
 
 run: kernel
 	qemu-system-i386 -drive format=raw,file=kernel,if=floppy
