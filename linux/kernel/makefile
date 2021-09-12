@@ -9,7 +9,7 @@ LDFLAGS=-m elf_i386
 
 OUTPUT=output
 
-build: kernel 
+build: $(OUTPUT) kernel
 
 kernel: entry.o main.o screen.o func.o 
 	mv *.o *.d $(OUTPUT)
@@ -28,15 +28,15 @@ main.o: main.c
 screen.o: screen.c
 	gcc -nostdinc $(CFLAGS) -c -o $@ $<
 	# mv $@ $(OUTPUT)
-func.o: func.nas
+func.o: func.asm
 	nasm -g -f elf32 -o $@ $<
 
 run: kernel
 	qemu-system-i386 -drive format=raw,file=kernel,if=floppy
 
 clean:
-	@rm -r $(OUTPUT) 
-	@rm -f entry.o main.o screen.o kernel.out kernel.asm kernel *.d
+	rm -fr $(OUTPUT) 
+	rm -f entry.o main.o screen.o kernel.out kernel.asm kernel *.d
 
 $(OUTPUT): 
 	mkdir -p $(OUTPUT)
