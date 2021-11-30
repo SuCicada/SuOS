@@ -29,15 +29,21 @@ main.o: main.c
 screen.o: screen.c
 	gcc -nostdinc $(CFLAGS) -c -o $@ $<
 	# mv $@ $(OUTPUT)
-func.o: func.nas
+func.o: func.asm
 	nasm -g -f elf32 -o $@ $<
 
 run: kernel
 	qemu-system-i386 -drive format=raw,file=kernel,if=floppy
 
+<<<<<<< HEAD
 clean: 
 	@rm -fr $(OUTPUT) 
 	@rm -fr entry.o main.o screen.o kernel.out kernel.asm kernel *.d
+=======
+clean:
+	rm -fr $(OUTPUT) 
+	rm -f entry.o main.o screen.o kernel.out kernel.asm kernel *.d
+>>>>>>> 207d131ba83eda79204579b9e272e6cd4334d325
 
 $(OUTPUT): 
 	mkdir -p $(OUTPUT)
