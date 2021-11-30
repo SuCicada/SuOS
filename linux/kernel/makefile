@@ -9,7 +9,8 @@ LDFLAGS=-m elf_i386
 
 OUTPUT=output
 
-build: kernel 
+build: $(OUTPUT) kernel 
+	@echo build kernel over
 
 kernel: entry.o main.o screen.o func.o 
 	mv *.o *.d $(OUTPUT)
@@ -34,9 +35,9 @@ func.o: func.nas
 run: kernel
 	qemu-system-i386 -drive format=raw,file=kernel,if=floppy
 
-clean:
-	@rm -r $(OUTPUT) 
-	@rm -f entry.o main.o screen.o kernel.out kernel.asm kernel *.d
+clean: 
+	@rm -fr $(OUTPUT) 
+	@rm -fr entry.o main.o screen.o kernel.out kernel.asm kernel *.d
 
 $(OUTPUT): 
 	mkdir -p $(OUTPUT)
