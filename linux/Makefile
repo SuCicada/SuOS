@@ -5,7 +5,7 @@ IMG = $(OUT_IMG)
 OUT_BIN = $(OUTPUT)/suos.bin
 OUT_LST = $(OUTPUT)/suos.lst
 OUT_FLOPPY = $(OUTPUT)/floppy.bin 
-KERNEL=kernel/$(OUTPUT)/kernel
+KERNEL = kernel/$(OUTPUT)/kernel
 
 QEMU = qemu-system-x86_64
 EDIMG = $(BIN)/edimg.sh
@@ -28,8 +28,8 @@ $(KERNEL):
 build: $(IMG) build_kernel copy
 	@echo over
 	
-run: $(IMG) build
-	$(QEMU) -drive file=$<,if=floppy
+run: clean build
+	$(QEMU) -drive file=$(IMG),if=floppy
 
 copy: $(IMG) $(KERNEL)
 	mkdir -p $(TMP_DIR)

@@ -1,4 +1,4 @@
-#include<header.h>
+#include <header.h>
 
 void clear_screen(char color) //15:pure white
 {
