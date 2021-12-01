@@ -11,10 +11,10 @@ void bootmain(void){
 
 	for(i=0xa0000;i<=0xa4fff;i++){
 		// write_mem8(i,x);
-		*((char *)i) = i & 0x0f;
+		*((char *)i) = i & 0xff;
 	}
 	for(i=0xa6000;i<=0xaffff;i++){
-		*((char *)i) = 25;
+		*((char *)i) = 3;
 		// write_mem8(i,3);
 	}
 	// for(i=start;i<=end;i++){

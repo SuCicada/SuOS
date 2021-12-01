@@ -40,6 +40,6 @@ write_mem8:
 	RET
 io_out8:
 	MOV		EDX, [ESP+4]	;port
-	MOV		AL,	[ESP+8]	;data
+	MOV		AL,	[ESP+8]		;data
 	OUT 	DX, AL
 	RET
