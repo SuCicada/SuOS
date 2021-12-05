@@ -22,10 +22,15 @@ kernel: entry.o main.o screen.o func.o
 entry.o: entry.S
 	gcc -nostdinc $(CFLAGS) -c -o $@ $<
 	# mv $@ $(OUTPUT)
-main.o: main.c
+main.o: main.c 
 	@#对应《30天》中的bootpack.c
 	gcc -nostdinc $(CFLAGS) -Os -c -o $@ $<
-	# mv $@ $(OUTPUT)
+	objdump -S $@ > $(OUTPUT)/$@.asm ;
+
+color.o: color.h
+	gcc -nostdinc $(CFLAGS) -Os -c -o $@ $<
+	objdump -S $@ > $(OUTPUT)/$@.asm ;
+	
 screen.o: screen.c
 	gcc -nostdinc $(CFLAGS) -c -o $@ $<
 	# mv $@ $(OUTPUT)

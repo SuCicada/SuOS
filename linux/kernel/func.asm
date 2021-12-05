@@ -1,17 +1,16 @@
 ; naskfunc
 ; TAB=4
 
-; �I�u�W�F�N�g�t�@�C���̂��߂̏��
+; オブジェクトファイルのための情報
 
 section .text
-	GLOBAL	io_hlt			; ���̃v���O�����Ɋ܂܂��֐���
+	GLOBAL	io_hlt			; このプログラムに含まれる関数名
 	GLOBAL	write_mem8
 	GLOBAL	io_cli, io_sti
 	GLOBAL	io_read_eflags, io_store_eflags
-	GLOBAL	
 	GLOBAL	io_out8
 
-; �ȉ��͎��ۂ̊֐�
+; 以下は実際の関数
 
 
 io_hlt:	; void io_hlt(void);
