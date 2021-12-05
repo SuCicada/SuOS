@@ -7,7 +7,8 @@ OUT_LST = $(OUTPUT)/suos.lst
 OUT_FLOPPY = $(OUTPUT)/floppy.bin 
 KERNEL = kernel/$(OUTPUT)/kernel
 
-QEMU = qemu-system-x86_64
+# QEMU = qemu-system-x86_64
+QEMU = qemu-system-i386
 EDIMG = $(BIN)/edimg.sh
 TMP_DIR = /tmp/floppy
 MOUNT = sudo mount
@@ -28,9 +29,11 @@ $(KERNEL):
 
 build: $(IMG) build_kernel copy
 	@echo over
-	
-run: clean build
+prerun: clean build
+run: prerun
 	$(QEMU) -drive file=$(IMG),if=floppy
+debug: 
+	$(QEMU) -drive file=$(IMG),if=floppy -gdb tcp:0.0.0.0:1234 -S
 
 copy: $(IMG) $(KERNEL)
 	mkdir -p $(TMP_DIR)

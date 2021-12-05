@@ -1,9 +1,18 @@
-addr=0x7c00
+addr=0xc400
 OBJDIR=.
 
-CFLAGS := $(CFLAGS) -O1 -fno-builtin -I$(OBJDIR) -MD                                                                                        
+CFLAGS := $(CFLAGS) -nostdinc -O0  -I$(OBJDIR)
+# 不使用C语言的内建函数 
+CFLAGS += -fno-builtin
+#  -MD                                                                                        
 CFLAGS += -fno-omit-frame-pointer
-CFLAGS += -Wall -Wno-format -Wno-unused -Werror -gstabs -m32
+# 编译后显示所有警告
+CFLAGS += -Wall -Wno-format -Wno-unused -Werror 
+# debug info
+CFLAGS += -gstabs 
+CFLAGS += -m32 -march=i486
+CFLAGS += -std=c99  -fno-stack-protector -g
+
 
 LDFLAGS=-m elf_i386
 
@@ -13,26 +22,31 @@ build: $(OUTPUT) kernel
 	@echo build kernel over
 
 kernel: entry.o main.o screen.o func.o 
-	mv *.o *.d $(OUTPUT)
+	mv *.o $(OUTPUT)
 	cd $(OUTPUT) ;\
 	ld $(LDFLAGS) -N -e start -Ttext $(addr) -o $@.out $^ ;\
 	objdump -S $@.out >$@.asm ;\
 	objcopy -S -O binary -j .text $@.out $@ 
 	
 entry.o: entry.S
-	gcc -nostdinc $(CFLAGS) -c -o $@ $<
+	gcc $(CFLAGS) -c -o $@ $<
 	# mv $@ $(OUTPUT)
 main.o: main.c 
 	@#对应《30天》中的bootpack.c
-	gcc -nostdinc $(CFLAGS) -Os -c -o $@ $<
+	gcc $(CFLAGS) -c -o $@ $<
 	objdump -S $@ > $(OUTPUT)/$@.asm ;
 
-color.o: color.h
-	gcc -nostdinc $(CFLAGS) -Os -c -o $@ $<
-	objdump -S $@ > $(OUTPUT)/$@.asm ;
-	
+color.o: color.c
+	gcc $(CFLAGS) -c -o output/$@ $<
+	# objdump -S output/$@ > $(OUTPUT)/$@.asm ;
+	../../bin/objconv.exe -fnasm output/$@
+	 
+color.S: color.c
+	gcc $(CFLAGS) -c -S -o output/$@ $<
+
+
 screen.o: screen.c
-	gcc -nostdinc $(CFLAGS) -c -o $@ $<
+	gcc $(CFLAGS) -c -o $@ $<
 	# mv $@ $(OUTPUT)
 func.o: func.asm
 	nasm -g -f elf32 -o $@ $<
