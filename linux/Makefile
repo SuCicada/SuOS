@@ -15,7 +15,8 @@ UMOUNT = sudo umount
 UID = $(shell id -u)
 GID = $(shell id -g)
 
-build_kernel: $(KERNEL)
+build_kernel: 
+	make $(KERNEL)
 $(KERNEL):
 	# nasm -o bootloader suos.nas
 	cd ./kernel;make clean;make build addr=0xc400 
