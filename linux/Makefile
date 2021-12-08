@@ -16,6 +16,9 @@ UMOUNT = sudo umount
 UID = $(shell id -u)
 GID = $(shell id -g)
 
+build: $(IMG) build_kernel copy
+	@echo over
+	
 build_kernel: 
 	make $(KERNEL)
 $(KERNEL):
@@ -27,8 +30,7 @@ $(KERNEL):
 # 	make clean
 # 	make run addr=0xc400 
 
-build: $(IMG) build_kernel copy
-	@echo over
+
 prerun: clean build
 run: prerun
 	$(QEMU) -drive file=$(IMG),if=floppy

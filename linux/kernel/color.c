@@ -21,7 +21,7 @@ void init_palette()
         0x00, 0x84, 0x84, // 008484 : 14: 暗い水色
         0x84, 0x84, 0x84 // 848484 : 15: 暗い灰色
     };
-    rgb_table[0*3+0]=0xff;
+    rgb_table[0]=0xff;
     // rgb_table[0 * 3 + 1] = 0xff;
     // rgb_table[0 * 3 + 2] = 0xff;
     // set_palette(0, 15, rgb_table);

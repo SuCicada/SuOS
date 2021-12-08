@@ -46,7 +46,7 @@ start:
 		
 		
 		
-#diplay something
+# diplay something
   movw $msg,%si
   call puts
   
@@ -54,7 +54,7 @@ start:
   call puts
   
 
-  #jmp .
+  # jmp .
    cli                         # Disable interrupts
    cld                         # String operations increment
 

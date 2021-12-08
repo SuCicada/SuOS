@@ -26,7 +26,9 @@ kernel: entry.o main.o screen.o func.o
 	cd $(OUTPUT) ;\
 	ld $(LDFLAGS) -N -e start -Ttext $(addr) -o $@.out $^ ;\
 	objdump -S $@.out >$@.asm ;\
-	objcopy -S -O binary -j .text $@.out $@ 
+	objcopy -O binary -j .text $@.out $@ 
+	# 
+	
 	
 entry.o: entry.S
 	gcc $(CFLAGS) -c -o $@ $<
