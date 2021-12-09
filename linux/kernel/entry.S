@@ -19,10 +19,6 @@
 start:
   .code16                     # Assemble for 16-bit mode
 
-
-  
-
-
   # Set up the important data segment registers (DS, ES, SS).
   xorw    %ax,%ax             # Segment number zero
   movw    %ax,%ds             # -> Data Segment
@@ -33,18 +29,16 @@ start:
   movb $0x00,%ah
   int $0x10
   
-#save color mode in ram 0x0ff0
- movb $8,(VMODE)
- movw $320,(SCRNX)
- movw $200,(SCRNY)
- movl $0x000a0000,(VRAM)
-
- #get keyboard led status
- movb	$0x02,%ah 
- int     $0x16			#keyboard interrupts
- movb   %al,(LEDS)
-		
-		
+  # save color mode in ram 0x0ff0
+  movb $8,(VMODE)
+  movw $320,(SCRNX)
+  movw $200,(SCRNY)
+  movl $0x000a0000,(VRAM)
+  
+  # get keyboard led status
+  movb	$0x02,%ah 
+  int     $0x16			# keyboard interrupts
+  movb   %al,(LEDS)
 		
 # diplay something
   movw $msg,%si
@@ -53,7 +47,6 @@ start:
   movw $try,%si
   call puts
   
-
   # jmp .
    cli                         # Disable interrupts
    cld                         # String operations increment
@@ -97,7 +90,6 @@ try:
   .asciz "\r\n\n\rtry it again"
 
 puts:
-
 	movb (%si),%al
 	add $1,%si
 	cmp $0,%al
@@ -132,12 +124,12 @@ spin:
 # Bootstrap GDT
 .p2align 2                                # force 4 byte alignment
 gdt:
-  SEG_NULL				# null seg
-  SEG(STA_X|STA_R, 0x0, 0xffffffff)	# code seg
-  SEG(STA_W, 0x0, 0xffffffff)	        # data seg
+  SEG_NULL			                        	# null seg
+  SEG(STA_X|STA_R, 0x0, 0xffffffff)	      # code seg
+  SEG(STA_W, 0x0, 0xffffffff)	            # data seg
 
 gdtdesc:
   .word   0x17                            # sizeof(gdt) - 1
   .long   gdt                             # address gdt
 
-#.fill 310
+# .fill 310

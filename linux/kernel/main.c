@@ -1,80 +1,112 @@
 #include <asmfunc.h>
 #include <color.c>
+/*
+  0xa0000 -> 0xaffff is screen memery
+  注意这里的函数名字为bootmain，因为在entry.S中设定的入口名字也是bootmain，两者要保持一致
+ */
+struct BootInfo
+{
+	char cyls, leds, vmode, reserve; // 1 byte * 4 ;
+	short scrnx, scrny;				 // 2 byte * 2 ; x_size, y_size
+	char *vram;						 // 4 byte
+};
 
-//注意这里的函数名字为bootmain，因为在entry.S中设定的入口名字也是bootmain，两者要保持一致
-// void init_palette(void);
+int DISPLAY_X_SIZE = 320;
+int DISPLAY_Y_SIZE = 200;
+char *DISPLAY_ADDRE = (char *)0xa0000;
+void init_display_info(struct BootInfo *binfo);
+void boxfill(int color_flag, int x0, int y0, int x1, int y1);
+void init_screen();
+void putfont(int x, int y, char color, char *font);
+
 void bootmain(void)
 {
-	init_palette();
-	int i;
-	// 0xa0000 -> 0xaffff is screen memery
-	int start = 0xa0000;
-	int end = 0xaffff;
+	struct BootInfo *binfo = (struct BootInfo *)0x0ff0;
 
-	for(i=0xa0000;i<=0xa4fff;i++){
-		// write_mem8(i,x);
-		*((char *)i) = i & 0xff;
-	}
-	for(i=0xa6000;i<=0xaffff;i++){
-		*((char *)i) = 0;
-		// write_mem8(i,3);
-	}
+	init_display_info(binfo);
+	init_palette();
+	init_screen();
+
+	static char font_A[16] = {
+		0x00, 0x18, 0x18, 0x18, 0x18, 0x24, 0x24, 0x24,
+		0x24, 0x7e, 0x42, 0x42, 0x42, 0xe7, 0x00, 0x00,
+  	};
+	putfont(10, 10, COL8_FFFFFF, font_A);
+
+	// for (i = 0xa0000; i <= 0xa4fff; i++)
+	// {
+	// 	// write_mem8(i,x);
+	// 	*((char *)i) = i & 0xff;
+	// }
+	// for (i = 0xa6000; i <= 0xaffff; i++)
+	// {
+	// 	*((char *)i) = 1;
+	// 	// write_mem8(i,3);
+	// }
+
 	// for(i=start;i<=end;i++){
 	// 	write_mem8(i,15);
 	// }
 	// // while(1);
-fin:
-	io_hlt();
-	goto fin;
+	for (;;)
+	{
+		io_hlt();
+	}
 }
 
-// void set_palette(int start, int end, unsigned char *rgb_table);
+void putfont(//char *vram,   // 4 byte
+              //int xsize,    // 4 byte
+              int x,        // 4 byte
+              int y,        // 4 byte
+              char color,       // 1 byte
+              char *font)   // 4 byte
+{
+  	int i;
+  	char d;     // 1 byte
+  	char *p;    // 4 byte
+  	for (i = 0; i < 16; i++){
+		// 左上を(0, 0)として(x, y)の座標に描画
+		p = DISPLAY_ADDRE + (y + i) * DISPLAY_X_SIZE + x;   // 1 byte
+		d = font[i];
+		unsigned char tmp=1<<7;
+		for(int j=0; j<8; j++,tmp>>=1){
+			if ((d & tmp) != 0)
+				p[j] = color;
+		}
+	}
+  	return;
+}
 
-// unsigned char rgb_table[16 * 3] = {
-// 	0xff, 0xff, 0xff, // 000000 : 0 : 黒
-// 	0xff, 0x00, 0x00, // ff0000 : 1 : 明るい赤
-// 	0x00, 0xff, 0x00, // 00ff00 : 2 : 明るい緑
-// 	0xff, 0xff, 0x00, // ffff00 : 3 : 黄色
-// 	0x00, 0x00, 0xff, // 0000ff : 4 : 明るい青
-// 	0xff, 0x00, 0xff, // ff00ff : 5 : 明るい紫
-// 	0x00, 0xff, 0xff, // 00ffff : 6 : 明るい水色
-// 	0xff, 0xff, 0xff, // ffffff : 7 : 白
-// 	0xc6, 0xc6, 0xc6, // c6c6c6 : 8 : 明るい灰色
-// 	0x84, 0x00, 0x00, // 840000 : 9 : 暗い赤
-// 	0x00, 0x84, 0x00, // 008400 : 10: 暗い緑
-// 	0x84, 0x84, 0x00, // 848400 : 11: 暗い黄色
-// 	0x00, 0x00, 0x84, // 000084 : 12: 暗い青
-// 	0x84, 0x00, 0x84, // 840084 : 13: 暗い紫
-// 	0x00, 0x84, 0x84, // 008484 : 14: 暗い水色
-// 	0x84, 0x84, 0x84, // 848484 : 15: 暗い灰色
-// };
-// void init_palette()
-// {
-// 	// set_palette(0, 15, rgb_table);
-// 	//   return;
-// 	// static char 命令は、データにしか使えないけどDB命令担当
-// 	// }
+void init_display_info(struct BootInfo *binfo)
+{
+	DISPLAY_ADDRE = binfo->vram;
+	DISPLAY_X_SIZE = binfo->scrnx,
+	DISPLAY_Y_SIZE = binfo->scrny;
+}
+void boxfill(int color_flag, int x0, int y0, int x1, int y1)
+{
+	for (int y = y0; y <= y1; y++)
+		for (int x = x0; x <= x1; x++)
+			((char *)DISPLAY_ADDRE)[y * DISPLAY_X_SIZE + x] = color_flag;
+}
 
-// 	// void set_palette(int start, int end, unsigned char *rgb_table){
-// 	int start = 0, end = 15;
-// 	int flag = io_read_eflags();
-// 	io_cli();
-// 	unsigned char *rgb_table_pnt = rgb_table;
-// 	io_out8(0x03c8, start);
-// 	for (int i = start; i <= end; i++)
-// 	{
-// 		// io_out8(0x03c9, 0xff);
-// 		// io_out8(0x03c9, 0x00);
-// 		// io_out8(0x03c9, 0x00);
-// 		for (int j = 0; j < 3; j++)
-// 		{
-// 			// io_out8(0x03c9, rgb_table_pnt[j] + 0x0f);
-// 			io_out8(0x03c9, rgb_table[i * 3 + j] / 4);
-// 			// rgb_table[j]
-// 		}
-// 		rgb_table_pnt += 3;
-// 	}
-// 	io_store_eflags(flag);
-// 	// io_sti();
-// 	return;
-// }
+void init_screen()
+{
+	int xsize = DISPLAY_X_SIZE, ysize = DISPLAY_Y_SIZE;
+	boxfill(COL8_008484, 0, 0, xsize - 1, ysize - 29);
+	boxfill(COL8_C6C6C6, 0, ysize - 28, xsize - 1, ysize - 28);
+	boxfill(COL8_FFFFFF, 0, ysize - 27, xsize - 1, ysize - 27);
+	boxfill(COL8_C6C6C6, 0, ysize - 26, xsize - 1, ysize - 1);
+
+	boxfill(COL8_FFFFFF, 3, ysize - 24, 59, ysize - 24);
+	boxfill(COL8_FFFFFF, 2, ysize - 24, 2, ysize - 4);
+	boxfill(COL8_848484, 3, ysize - 4, 59, ysize - 4);
+	boxfill(COL8_848484, 59, ysize - 23, 59, ysize - 5);
+	boxfill(COL8_000000, 2, ysize - 3, 59, ysize - 3);
+	boxfill(COL8_000000, 60, ysize - 24, 60, ysize - 3);
+
+	boxfill(COL8_848484, xsize - 47, ysize - 24, xsize - 4, ysize - 24);
+	boxfill(COL8_848484, xsize - 47, ysize - 23, xsize - 47, ysize - 4);
+	boxfill(COL8_FFFFFF, xsize - 47, ysize - 3, xsize - 4, ysize - 3);
+	boxfill(COL8_FFFFFF, xsize - 3, ysize - 24, xsize - 3, ysize - 3);
+}

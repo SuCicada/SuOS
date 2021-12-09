@@ -21,17 +21,20 @@ OUTPUT=output
 build: $(OUTPUT) kernel 
 	@echo build kernel over
 
+# https://linux.die.net/man/1/ld
+# https://sites.ualberta.ca/dept/chemeng/AIX-43/share/man/info/C/a_doc_lib/cmds/aixcmds3/ld.htm
 kernel: entry.o main.o screen.o func.o 
 	mv *.o $(OUTPUT)
 	cd $(OUTPUT) ;\
-	ld $(LDFLAGS) -N -e start -Ttext $(addr) -o $@.out $^ ;\
-	objdump -S $@.out >$@.asm ;\
-	objcopy -O binary -j .text $@.out $@ 
-	# 
+	ld $(LDFLAGS) -N -e start -Ttext  $(addr) -o $@.out $^ ;\
+	objdump -j .text -j .data -S $@.out >$@.asm ;\
+	objcopy -j .text -j .data -O binary $@.out $@ 
 	
 	
 entry.o: entry.S
 	gcc $(CFLAGS) -c -o $@ $<
+	objdump -S $@ > $(OUTPUT)/$@.asm ;
+
 	# mv $@ $(OUTPUT)
 main.o: main.c 
 	@#对应《30天》中的bootpack.c
@@ -47,14 +50,12 @@ color.S: color.c
 	gcc $(CFLAGS) -c -S -o output/$@ $<
 
 
-screen.o: screen.c
-	gcc $(CFLAGS) -c -o $@ $<
-	# mv $@ $(OUTPUT)
+# screen.o: screen.c
+# 	gcc $(CFLAGS) -c -o $@ $<
+# 	# mv $@ $(OUTPUT)
+
 func.o: func.asm
 	nasm -g -f elf32 -o $@ $<
-
-# run: build
-# 	qemu-system-i386 -drive format=raw,file=kernel,if=floppy
 
 clean: 
 	@rm -fr $(OUTPUT) 

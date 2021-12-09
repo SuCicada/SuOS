@@ -16,11 +16,9 @@ UMOUNT = sudo umount
 UID = $(shell id -u)
 GID = $(shell id -g)
 
-build: $(IMG) build_kernel copy
+build: clean $(IMG) $(KERNEL) copy
 	@echo over
-	
-build_kernel: 
-	make $(KERNEL)
+
 $(KERNEL):
 	# nasm -o bootloader suos.nas
 	cd ./kernel;make clean;make build addr=0xc400 
@@ -30,9 +28,7 @@ $(KERNEL):
 # 	make clean
 # 	make run addr=0xc400 
 
-
-prerun: clean build
-run: prerun
+run: build
 	$(QEMU) -drive file=$(IMG),if=floppy
 debug: 
 #	$(QEMU) -drive file=$(IMG),if=floppy -gdb tcp:0.0.0.0:1234 -S
