@@ -35,7 +35,8 @@ prerun: clean build
 run: prerun
 	$(QEMU) -drive file=$(IMG),if=floppy
 debug: 
-	$(QEMU) -drive file=$(IMG),if=floppy -gdb tcp:0.0.0.0:1234 -S
+#	$(QEMU) -drive file=$(IMG),if=floppy -gdb tcp:0.0.0.0:1234 -S
+	$(QEMU) -fda $(IMG) -s -S
 
 copy: $(IMG) $(KERNEL)
 	mkdir -p $(TMP_DIR)
