@@ -1,5 +1,6 @@
 #include <asmfunc.h>
 #include <color.c>
+#include "hankaku.h"
 /*
   0xa0000 -> 0xaffff is screen memery
   注意这里的函数名字为bootmain，因为在entry.S中设定的入口名字也是bootmain，两者要保持一致
@@ -31,7 +32,11 @@ void bootmain(void)
 		0x00, 0x18, 0x18, 0x18, 0x18, 0x24, 0x24, 0x24,
 		0x24, 0x7e, 0x42, 0x42, 0x42, 0xe7, 0x00, 0x00,
   	};
-	putfont(10, 10, COL8_FFFFFF, font_A);
+	static char msg[] = "I'm SuCicada.";
+	for(int i=0;i<sizeof(msg)-1;i++){
+		int font = msg[i];
+		putfont(10*i+5, 10, COL8_FFFFFF, hankaku[font]);
+	}
 
 	// for (i = 0xa0000; i <= 0xa4fff; i++)
 	// {

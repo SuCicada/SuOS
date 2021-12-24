@@ -16,12 +16,12 @@ UMOUNT = sudo umount
 UID = $(shell id -u)
 GID = $(shell id -g)
 
-build: clean $(IMG) $(KERNEL) copy
+build: $(IMG) $(KERNEL) copy
 	@echo over
 
 $(KERNEL):
 	# nasm -o bootloader suos.nas
-	cd ./kernel;make clean;make build addr=0xc400 
+	make -C kernel  build addr=0xc400 
 
 # $(KERNEL):
 # 	cd ./kernel
@@ -57,10 +57,10 @@ $(IMG): $(OUT_BIN)
 $(OUTPUT): 
 	mkdir -p $(OUTPUT)
 
-.PHONY: list
-
+.PHONY: list clean
 list:
 	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$'
+
 clean:
-	@rm -fr $(OUTPUT) 
+	rm -fr $(OUTPUT) 
 	cd ./kernel;make clean
