@@ -11,7 +11,7 @@ CFLAGS += -fno-omit-frame-pointer
 # 编译后显示所有警告
 CFLAGS += -Wall -Wno-format -Wno-unused -Werror 
 # debug info
-CFLAGS += -gstabs 
+CFLAGS += -gstabs
 CFLAGS += -m32 -march=i486
 CFLAGS += -std=c99  -fno-stack-protector -g
 
@@ -21,16 +21,14 @@ SOURCE_FILES = func.asm asmfunc.h \
  	entry.S mmu.h \
 	convHankakuTxt.c hankaku.txt \
 	main.c color.c hankaku.h 
-
-OBJ_NAME =  main.o entry.o func.o
+# 注意，顺序很重要，entry 要在第一个
+OBJ_NAME = entry.o main.o  func.o
 OBJ_FILES = $(patsubst %, $(OUTPUT)/%, $(OBJ_NAME))
 
-.PHONY: clean $(OBJ_NAME) kernel
+.PHONY: clean $(OBJ_NAME) kernel success
 
-build: info $(OUTPUT) sources $(OBJ_NAME) kernel 
-	@echo "=========================="
-	@echo "|| build kernel success ||"
-	@echo "=========================="
+kernel = $(OUTPUT)/kernel
+build: info $(OUTPUT) $(SOURCE_FILES) $(OBJ_NAME) $(kernel) success
 
 info:
 	@echo OUTPUT: 		$(OUTPUT)
@@ -39,35 +37,40 @@ info:
 	@echo CFLAGS:    	$(CFLAGS)
 	@echo ""
 
-# https://linux.die.net/man/1/ld
-# https://sites.ualberta.ca/dept/chemeng/AIX-43/share/man/info/C/a_doc_lib/cmds/aixcmds3/ld.htm
-
+success:
+	@echo "=========================="
+	@echo "|| build kernel success ||"
+	@echo "=========================="
+	
 sources: hankaku.h 
 	
+# https://linux.die.net/man/1/ld
+# https://sites.ualberta.ca/dept/chemeng/AIX-43/share/man/info/C/a_doc_lib/cmds/aixcmds3/ld.htm
 # .ONESHELL:
-kernel: $(OBJ_FILES)
+$(kernel) : $(OBJ_FILES)
 	# cd $(OUTPUT)
 	ld $(LDFLAGS) -N -e start -Ttext $(addr) -o $@.out $^
 	objdump -j .text -j .data -S $@.out > $@.asm 
 	objcopy -j .text -j .data -O binary $@.out $@ 
 
 # ========== source files 
-func.o: func.asm
-	nasm -g -f elf32 -o $(OUTPUT)/$@ $<
+$(OUTPUT)/func.o: func.asm
+	nasm -g -f elf32 -o $@ $<
 	
-entry.o: entry.S mmu.h
-	gcc $(CFLAGS) -c -o $(OUTPUT)/$@ $<
-	objdump -S $(OUTPUT)/$@ > $(OUTPUT)/$*.asm
+$(OUTPUT)/entry.o: entry.S mmu.h
+	gcc $(CFLAGS) -c -o $@ $<
+	objdump -S $@ > $(patsubst %.o, %.asm, $@)
 
-main.o: main.c color.c hankaku.h 
-	gcc $(CFLAGS) -c -o $(OUTPUT)/$@ $<
-	objdump -S $(OUTPUT)/$@ > $(OUTPUT)/$*.asm
+$(OUTPUT)/main.o: main.c color.c hankaku.h 
+	gcc $(CFLAGS) -c -o $@ $<
+	objdump -S $@ > $(patsubst %.o, %.asm, $@)
 
-hankaku.h: hankaku.txt convHankakuTxt
-	$(OUTPUT)/convHankakuTxt hankaku.txt $@
+convHankakuTxt = $(OUTPUT)/convHankakuTxt
+hankaku.h: hankaku.txt $(convHankakuTxt)
+	 $(convHankakuTxt) $< $@
 
-convHankakuTxt: convHankakuTxt.c 
-	gcc -o $(OUTPUT)/$@ $<
+$(convHankakuTxt): convHankakuTxt.c 
+	gcc -o  $@ $<
 
 $(OUTPUT): 
 	mkdir -p $(OUTPUT)
@@ -78,7 +81,7 @@ $(OUTPUT):
 # make就不会去检查是否存在一个叫做clean的文件，而是每次运行都执行对应的命令。
 .PHONY: clean
 clean: 
-	rm -fr $(OUTPUT) 
+	rm -frv $(OUTPUT) 
 	@# @rm -fr entry.o main.o screen.o kernel.out kernel.asm kernel *.d
 
 
