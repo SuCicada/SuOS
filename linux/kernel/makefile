@@ -3,11 +3,12 @@ addr=0xc400
 OUTPUT=output
 OBJDIR=.
 
-CFLAGS := $(CFLAGS) -nostdinc -O0  -I.
+CFLAGS := $(CFLAGS) -O0  -I. -static-libgcc 
+# CFLAGS += -nostdinc
 # 不使用C语言的内建函数 
-CFLAGS += -fno-builtin
+# CFLAGS += -fno-builtin
 #  -MD                                                                                        
-CFLAGS += -fno-omit-frame-pointer
+# CFLAGS += -fno-omit-frame-pointer
 # 编译后显示所有警告
 CFLAGS += -Wall -Wno-format -Wno-unused -Werror 
 # debug info
@@ -16,7 +17,9 @@ CFLAGS += -m32 -march=i486
 CFLAGS += -std=c99  -fno-stack-protector -g
 
 
-LDFLAGS = -m elf_i386
+LDFLAGS = -m elf_i386  -nostdlib -nostdinc
+
+
 SOURCE_FILES = func.asm asmfunc.h \
  	entry.S mmu.h \
 	convHankakuTxt.c hankaku.txt \
@@ -49,9 +52,10 @@ sources: hankaku.h
 # .ONESHELL:
 $(kernel) : $(OBJ_FILES)
 	# cd $(OUTPUT)
-	ld $(LDFLAGS) -N -e start -Ttext $(addr) -o $@.out $^
-	objdump -j .text -j .data -S $@.out > $@.asm 
-	objcopy -j .text -j .data -O binary $@.out $@ 
+	ld $(LDFLAGS) -N -e start -Ttext $(addr) -o $@.out $^ 
+	objcopy -j .text -j .data -j .rodata -O binary $@.out $@ 
+	objdump -j .text -j .data -j .rodata -S $@.out > $@.asm 
+	../../bin/objconv.exe -fnasm $@.out $@2.asm 
 
 # ========== source files 
 $(OUTPUT)/func.o: func.asm
@@ -61,9 +65,10 @@ $(OUTPUT)/entry.o: entry.S mmu.h
 	gcc $(CFLAGS) -c -o $@ $<
 	objdump -S $@ > $(patsubst %.o, %.asm, $@)
 
-$(OUTPUT)/main.o: main.c color.c hankaku.h 
-	gcc $(CFLAGS) -c -o $@ $<
+$(OUTPUT)/main.o: main.c color.c hankaku.h asmfunc.h
+	gcc $(CFLAGS) -c -o $@ $< 
 	objdump -S $@ > $(patsubst %.o, %.asm, $@)
+	../../bin/objconv.exe -fnasm $@ $(patsubst %.o, %2.asm, $@)
 
 convHankakuTxt = $(OUTPUT)/convHankakuTxt
 hankaku.h: hankaku.txt $(convHankakuTxt)
