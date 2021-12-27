@@ -47,14 +47,17 @@ success:
 	
 sources: hankaku.h 
 	
+	
 # https://linux.die.net/man/1/ld
 # https://sites.ualberta.ca/dept/chemeng/AIX-43/share/man/info/C/a_doc_lib/cmds/aixcmds3/ld.htm
 # .ONESHELL:
+# SECTIONS = -j .text -j .data -j .rodata 
+SECTIONS = 
 $(kernel) : $(OBJ_FILES)
 	# cd $(OUTPUT)
 	ld $(LDFLAGS) -N -e start -Ttext $(addr) -o $@.out $^ 
-	objcopy -j .text -j .data -j .rodata -O binary $@.out $@ 
-	objdump -j .text -j .data -j .rodata -S $@.out > $@.asm 
+	objcopy $(SECTIONS) -O binary $@.out $@ 
+	objdump $(SECTIONS) -S $@.out > $@.asm 
 	../../bin/objconv.exe -fnasm $@.out $@2.asm 
 
 # ========== source files 

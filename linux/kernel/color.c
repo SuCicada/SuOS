@@ -1,4 +1,5 @@
 #include <asmfunc.h>
+#include "hankaku.h"
 
 #define COL8_000000 0  // 黒
 #define COL8_FF0000 1  // 明るい赤
@@ -17,7 +18,27 @@
 #define COL8_008484 14 // 暗い水色
 #define COL8_848484 15 // 暗い灰色
 
-void set_palette(int start, int end, unsigned char *rgb_table);
+void set_palette(int start, int end, unsigned char* rgb_table);
+void boxfill(int color_flag, int x0, int y0, int x1, int y1);
+void putfont(int x, int y, char color, char* font);
+void putfont_asc(int x, int y, char color, char*);
+
+struct BootInfo {
+    char cyls, leds, vmode, reserve; // 1 byte * 4 ;
+    short scrnx, scrny;				 // 2 byte * 2 ; x_size, y_size
+    char* vram;						 // 4 byte
+};
+
+int DISPLAY_X_SIZE = 320;
+int DISPLAY_Y_SIZE = 200;
+char* DISPLAY_ADDRE = (char*)0xa0000;
+
+void init_display_info(struct BootInfo* binfo)
+{
+    DISPLAY_ADDRE = binfo->vram;
+    DISPLAY_X_SIZE = binfo->scrnx,
+        DISPLAY_Y_SIZE = binfo->scrny;
+}
 
 void init_palette()
 {
@@ -48,13 +69,13 @@ void init_palette()
     // static char 命令は、データにしか使えないけどDB命令担当
 }
 
-void set_palette(int start, int end, unsigned char *rgb_table)
+void set_palette(int start, int end, unsigned char* rgb_table)
 {
     // int start = 0,
     //     end = 15;
     int flag = io_read_eflags();
     io_cli();
-    unsigned char *rgb_table_pnt = rgb_table;
+    unsigned char* rgb_table_pnt = rgb_table;
     io_out8(0x03c8, start);
 
     for (int i = start; i <= end; i++)
@@ -73,4 +94,95 @@ void set_palette(int start, int end, unsigned char *rgb_table)
     io_store_eflags(flag);
     // io_sti();
     return;
+}
+
+
+// ==================  draw =========================
+void boxfill(int color_flag, int x0, int y0, int x1, int y1)
+{
+    for (int y = y0; y <= y1; y++)
+        for (int x = x0; x <= x1; x++)
+            ((char*)DISPLAY_ADDRE)[y * DISPLAY_X_SIZE + x] = color_flag;
+}
+
+void putfont(//char *vram,   // 4 byte
+              //int xsize,    // 4 byte
+    int x,        // 4 byte
+    int y,        // 4 byte
+    char color,       // 1 byte
+    char* font)   // 4 byte
+{
+    int i;
+    char d;     // 1 byte
+    char* p;    // 4 byte
+    for (i = 0; i < 16; i++) {
+        // 左上を(0, 0)として(x, y)の座標に描画
+        p = DISPLAY_ADDRE + (y + i) * DISPLAY_X_SIZE + x;   // 1 byte
+        d = font[i];
+        unsigned char tmp = 1 << 7;
+        for (int j = 0; j < 8; j++, tmp >>= 1) {
+            if ((d & tmp) != 0)
+                p[j] = color;
+        }
+    }
+    return;
+}
+
+void putfont_asc(int x, int y, char color, char* msg) {
+    // static char a[] = "nihoa";
+    // msg = a;
+    for (int i = 0; msg[i] != 0;i++) {
+        int font = msg[i];
+        putfont(10 * i + x, y, color, hankaku[font]);
+    }
+}
+
+void putblock(int x, int y, int xsize, int ysize, char* vblock) {
+    for (int i = 0; i < xsize; i++) {
+        for (int j = 0; j < ysize; j++) {
+            int display_size = (y + j) * DISPLAY_X_SIZE + x + i;
+            DISPLAY_ADDRE[display_size] = vblock[j * xsize + i];
+        }
+    }
+}
+
+void init_mouse_cursor8(char* mouse, char bg) {
+    char outline = COL8_000000;
+    char inside = COL8_FFFFFF;
+    const static char cursor[16][16] = {
+        "**************..",
+        "*OOOOOOOOOOO*...",
+        "*OOOOOOOOOO*....",
+        "*OOOOOOOOO*.....",
+        "*OOOOOOOO*......",
+        "*OOOOOOO*.......",
+        "*OOOOOOO*.......",
+        "*OOOOOOOO*......",
+        "*OOOO**OOO*.....",
+        "*OOO*..*OOO*....",
+        "*OO*....*OOO*...",
+        "*O*......*OOO*..",
+        "**........*OOO*.",
+        "*..........*OOO*",
+        "............*OO*",
+        ".............***"
+    };
+    char m;
+    for (int x = 0; x < 16; x++) {
+        for (int y = 0; y < 16; y++) {
+            char c = cursor[x][y];
+            switch (c) {
+            case 'O':
+                m = inside;
+                break;
+            case '*':
+                m = outline;
+                break;
+            case '.':
+                m = bg;
+                break;
+            }
+            mouse[y * 16 + x] = m;
+        }
+    }
 }

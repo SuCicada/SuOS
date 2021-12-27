@@ -2,31 +2,33 @@ int int2str(int n, char* s);
 int su_sprintf(char* __stream, char* __format, ...) {
     char c;
     char* stream = __stream;
-    char* arg = (char*)(&__format + sizeof(char*));
+    char* arg = (char*)(&__format + 1);
     // printf("arg %d\n",*(int*)arg);
     int n;
-    while ((c = *__format) && c) {
+    while ((c = *__format) && c!=0) {
         // printf("c %c\n",c);
         // printf("s %s\n",__stream);
-        if(c == '%'){
-
-        }else if (*(__format - 1) == '%') {
+        if (c == '%') {
+            __format++;
+            c = *__format;
             switch (c) {
             case 'd':
                 n = *(int*)arg;
+                // printf("n /%d\n",n);
+                // printf("n %d\n",*(arg+8));
                 arg += sizeof(int);
                 int len = int2str(n, stream);
-                // printf("len %d\n",n);
                 stream += len;
                 break;
             }
-        }else{
-                *stream = c;
-                stream++;
         }
-        *stream = '\0';
+        else {
+            *stream = c;
+            stream++;
+        }
         __format++;
     }
+    *stream = '\0';
     return 0;
 }
 

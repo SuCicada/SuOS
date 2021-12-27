@@ -1,7 +1,6 @@
 OUTPUT = output
 BIN = bin
-OUT_IMG = $(OUTPUT)/suos.img
-IMG = $(OUT_IMG)
+IMG = $(OUTPUT)/suos.img
 OUT_BIN = $(OUTPUT)/suos.bin
 OUT_LST = $(OUTPUT)/suos.lst
 OUT_FLOPPY = $(OUTPUT)/floppy.bin 
@@ -17,9 +16,11 @@ UID = $(shell id -u)
 GID = $(shell id -g)
 
 .PHONY: list clean kernel
-build: $(IMG) kernel copy
-	@echo over
 
+build: $(IMG) kernel copy
+	@echo "=========================="
+	@echo "|| build su_img success ||"
+	@echo "=========================="
 kernel:
 	# nasm -o bootloader suos.nas
 	make -C kernel  build addr=0xc400 
@@ -31,14 +32,15 @@ kernel:
 
 run: build
 	$(QEMU) -drive file=$(IMG),if=floppy
-debug: 
+
+debug: build
 #	$(QEMU) -drive file=$(IMG),if=floppy -gdb tcp:0.0.0.0:1234 -S
 	$(QEMU) -fda $(IMG) -s -S
 
 copy: $(IMG) $(KERNEL)
 	mkdir -p $(TMP_DIR)
 	make mount
-	# cp $(OUT_FLOPPY) $(TMP_DIR)
+#	cp $(OUT_FLOPPY) $(TMP_DIR)
 	cp $(KERNEL) $(TMP_DIR)
 	make umount
 
@@ -50,7 +52,7 @@ umount:
 
 $(OUT_BIN) : suos.nas Makefile output
 	nasm -o $@ -l $(OUT_LST) $<   
-	# nasm -o $(OUT_FLOPPY) -l $(OUTPUT)/floppy.lst floppy.nas
+# nasm -o $(OUT_FLOPPY) -l $(OUTPUT)/floppy.lst floppy.nas
 
 $(IMG): $(OUT_BIN)  
 	$(EDIMG) $< $@
@@ -62,5 +64,5 @@ list:
 	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$'
 
 clean:
-	rm -frv $(OUTPUT) 
+	rm -fr $(OUTPUT) 
 	cd ./kernel;make clean
