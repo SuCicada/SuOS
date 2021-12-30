@@ -1,47 +1,36 @@
-#include <asmfunc.h>
 #include "hankaku.h"
+#include "header.h"
+#include "color.h"
 
-#define COL8_000000 0  // 黒
-#define COL8_FF0000 1  // 明るい赤
-#define COL8_00FF00 2  // 明るい緑
-#define COL8_FFFF00 3  // 黄色
-#define COL8_0000FF 4  // 明るい青
-#define COL8_FF00FF 5  // 明るい紫
-#define COL8_00FFFF 6  // 明るい水色
-#define COL8_FFFFFF 7  // 白
-#define COL8_C6C6C6 8  // 明るい灰色
-#define COL8_840000 9  // 暗い赤
-#define COL8_008400 10 // 暗い緑
-#define COL8_848400 11 // 暗い黄色
-#define COL8_000084 12 // 暗い青
-#define COL8_840084 13 // 暗い紫
-#define COL8_008484 14 // 暗い水色
-#define COL8_848484 15 // 暗い灰色
 
-void set_palette(int start, int end, unsigned char* rgb_table);
-void boxfill(int color_flag, int x0, int y0, int x1, int y1);
-void putfont(int x, int y, char color, char* font);
-void putfont_asc(int x, int y, char color, char*);
-
-struct BootInfo {
-    char cyls, leds, vmode, reserve; // 1 byte * 4 ;
-    short scrnx, scrny;				 // 2 byte * 2 ; x_size, y_size
-    char* vram;						 // 4 byte
-};
-
-int DISPLAY_X_SIZE = 320;
-int DISPLAY_Y_SIZE = 200;
-char* DISPLAY_ADDRE = (char*)0xa0000;
-
-void init_display_info(struct BootInfo* binfo)
-{
+void init_display_info(struct BootInfo* binfo) {
     DISPLAY_ADDRE = binfo->vram;
     DISPLAY_X_SIZE = binfo->scrnx,
         DISPLAY_Y_SIZE = binfo->scrny;
 }
 
-void init_palette()
-{
+void init_screen() {
+    int xsize = DISPLAY_X_SIZE, ysize = DISPLAY_Y_SIZE;
+    boxfill8(BACKGROUND, 0, 0, xsize - 1, ysize - 29);
+    boxfill8(COL8_C6C6C6, 0, ysize - 28, xsize - 1, ysize - 28);
+    boxfill8(COL8_FFFFFF, 0, ysize - 27, xsize - 1, ysize - 27);
+    boxfill8(COL8_C6C6C6, 0, ysize - 26, xsize - 1, ysize - 1);
+
+    boxfill8(COL8_FFFFFF, 3, ysize - 24, 59, ysize - 24);
+    boxfill8(COL8_FFFFFF, 2, ysize - 24, 2, ysize - 4);
+    boxfill8(COL8_848484, 3, ysize - 4, 59, ysize - 4);
+    boxfill8(COL8_848484, 59, ysize - 23, 59, ysize - 5);
+    boxfill8(COL8_000000, 2, ysize - 3, 59, ysize - 3);
+    boxfill8(COL8_000000, 60, ysize - 24, 60, ysize - 3);
+
+    boxfill8(COL8_848484, xsize - 47, ysize - 24, xsize - 4, ysize - 24);
+    boxfill8(COL8_848484, xsize - 47, ysize - 23, xsize - 47, ysize - 4);
+    boxfill8(COL8_FFFFFF, xsize - 47, ysize - 3, xsize - 4, ysize - 3);
+    boxfill8(COL8_FFFFFF, xsize - 3, ysize - 24, xsize - 3, ysize - 3);
+}
+
+
+void init_palette() {
     static unsigned char rgb_table[16 * 3] = {
         0x00, 0x00, 0x00, // 000000 : 0 : 黒
         0xff, 0x00, 0x00, // ff0000 : 1 : 明るい赤
@@ -69,8 +58,7 @@ void init_palette()
     // static char 命令は、データにしか使えないけどDB命令担当
 }
 
-void set_palette(int start, int end, unsigned char* rgb_table)
-{
+void set_palette(int start, int end, unsigned char* rgb_table) {
     // int start = 0,
     //     end = 15;
     int flag = io_read_eflags();
@@ -98,8 +86,7 @@ void set_palette(int start, int end, unsigned char* rgb_table)
 
 
 // ==================  draw =========================
-void boxfill(int color_flag, int x0, int y0, int x1, int y1)
-{
+void boxfill8(int color_flag, int x0, int y0, int x1, int y1) {
     for (int y = y0; y <= y1; y++)
         for (int x = x0; x <= x1; x++)
             ((char*)DISPLAY_ADDRE)[y * DISPLAY_X_SIZE + x] = color_flag;
@@ -128,7 +115,7 @@ void putfont(//char *vram,   // 4 byte
     return;
 }
 
-void putfont_asc(int x, int y, char color, char* msg) {
+void putfonts8_asc(int x, int y, char color, char* msg) {
     // static char a[] = "nihoa";
     // msg = a;
     for (int i = 0; msg[i] != 0;i++) {

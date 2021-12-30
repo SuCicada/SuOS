@@ -114,6 +114,8 @@ protcseg:
   
   # Set up the stack pointer and call into C.
   movl    $start, %esp
+  
+start_main:
   call bootmain
 
   # If bootmain returns (it shouldn't), loop.
@@ -133,3 +135,4 @@ gdtdesc:
   .long   gdt                             # address gdt
 
 # .fill 310
+main:

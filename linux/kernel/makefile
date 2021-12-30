@@ -20,18 +20,19 @@ CFLAGS += -std=c99  -fno-stack-protector -g
 LDFLAGS = -m elf_i386  -nostdlib -nostdinc
 
 
-SOURCE_FILES = func.asm asmfunc.h \
+SOURCE_FILES = asmfunc.asm asmfunc.h \
  	entry.S mmu.h \
 	convHankakuTxt.c hankaku.txt \
 	main.c color.c hankaku.h 
 # 注意，顺序很重要，entry 要在第一个
-OBJ_NAME = entry.o main.o  func.o
+OBJ_NAME = entry.o main.o asmfunc.o dsctbl.o int.o color.o
 OBJ_FILES = $(patsubst %, $(OUTPUT)/%, $(OBJ_NAME))
 
 .PHONY: clean $(OBJ_NAME) kernel success
 
 kernel = $(OUTPUT)/kernel
-build: info $(OUTPUT) $(SOURCE_FILES) $(OBJ_NAME) $(kernel) success
+default:
+	make build
 
 info:
 	@echo OUTPUT: 		$(OUTPUT)
@@ -47,21 +48,23 @@ success:
 	
 sources: hankaku.h 
 	
-	
+build: info $(OUTPUT) $(SOURCE_FILES) $(OBJ_NAME) $(kernel) success	
+
+
 # https://linux.die.net/man/1/ld
 # https://sites.ualberta.ca/dept/chemeng/AIX-43/share/man/info/C/a_doc_lib/cmds/aixcmds3/ld.htm
 # .ONESHELL:
 # SECTIONS = -j .text -j .data -j .rodata 
 SECTIONS = 
 $(kernel) : $(OBJ_FILES)
-	# cd $(OUTPUT)
+# -Ttext 代表, 所有代码起始地址为 0xc400 ,即 entry 开始的地址
 	ld $(LDFLAGS) -N -e start -Ttext $(addr) -o $@.out $^ 
 	objcopy $(SECTIONS) -O binary $@.out $@ 
 	objdump $(SECTIONS) -S $@.out > $@.asm 
 	../../bin/objconv.exe -fnasm $@.out $@2.asm 
 
 # ========== source files 
-$(OUTPUT)/func.o: func.asm
+$(OUTPUT)/asmfunc.o: asmfunc.asm
 	nasm -g -f elf32 -o $@ $<
 	
 $(OUTPUT)/entry.o: entry.S mmu.h
@@ -72,6 +75,11 @@ $(OUTPUT)/main.o: main.c color.c hankaku.h asmfunc.h
 	gcc $(CFLAGS) -c -o $@ $< 
 	objdump -S $@ > $(patsubst %.o, %.asm, $@)
 	../../bin/objconv.exe -fnasm $@ $(patsubst %.o, %2.asm, $@)
+
+$(OUTPUT)/%.o: %.c
+	gcc $(CFLAGS) -c -o $@ $<
+	objdump -S $@ > $(patsubst %.o, %.asm, $@)
+
 
 convHankakuTxt = $(OUTPUT)/convHankakuTxt
 hankaku.h: hankaku.txt $(convHankakuTxt)

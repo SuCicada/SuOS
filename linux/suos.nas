@@ -34,39 +34,48 @@ entry:
     MOV     SP,0x7c00
     MOV     DS,AX
 ; ディスクを読む
+; 0x8000 -> 0x81ff 是给启动区的
+; 我们要将磁盘读到 [ES:BX] 即 0x0820 * 0x10 + [BX]
     MOV     AX,0x0820 
     MOV     ES,AX
     MOV     DL,0
-    MOV     DH,0
-    MOV     CH,0
-    MOV     CL,2
+    MOV     DH,0    ; 磁头 0
+    MOV     CH,0    ; 柱面 0
+    MOV     CL,2    ; 扇区 2
 readloop:
     MOV     SI,0
 retry:
-    MOV     AL,1
-    MOV     AH,0x02
+    MOV     AL,1    ; 读一个扇区
+    MOV     AH,0x02 ; 读盘操作标识
     MOV     BX,0
-    INT     0x13
-    JNC     next
+    INT     0x13    ; 调用磁盘BIOS
+    JNC     next    
+
     ADD     SI,1
-    CMP     SI,5
+    CMP     SI,5 
     JAE     error    
     MOV     AH,0x00
     MOV     DL,0
     INT     0x13
-    JMP     retry
+    JMP         
 
 next:
+    ; 内存段地址后移0x0020, 即 512B
     MOV     AX,ES
     ADD     AX,0x0020
     MOV     ES,AX
-    ADD     CL,1
+    ; 再读取一个扇区, 一共18个
+    ADD     CL,1    
     CMP     CL,18
     JNA     readloop
-    ADD     DH,1
-    MOV     CL,1
+    
+    ; 再读取一个完整磁头, 一共2个
+    ADD     DH,1    
+    MOV     CL,1   
     CMP     DH,2
     JB      readloop
+
+    ; 再读取一个完整柱面, 一共CYLS个
     ADD     CH,1
     MOV     DH,0
     MOV     CL,1

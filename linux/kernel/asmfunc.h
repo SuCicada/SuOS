@@ -5,3 +5,10 @@ extern void io_cli();
 extern void io_sti();
 extern void io_store_eflags(int flag);
 extern void io_out8(int port, int data);
+
+extern void load_idtr(int limit, int addr);
+extern void load_gdtr(int limit, int addr);
+
+void asm_inthandler21();
+void asm_inthandler27();
+void asm_inthandler2c();

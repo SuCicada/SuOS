@@ -5,4 +5,8 @@ https://github.com/zchrissirhcz/osask-linux
 
 https://shouzo.github.io/2021/05/18/30OS_day4/
 http://takeisamemo.blogspot.com/2014/09/os30os-3-4.html
-http://takeisamemo.blogspot.com/2014/09/os30os-3-4.html
+
+
+sudo apt-get install gcc-multilib
+
+[汇编中bss,data,text,rodata,heap,stack段的作用](https://blog.csdn.net/BXD1314/article/details/38433837)

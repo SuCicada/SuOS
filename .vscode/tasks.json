@@ -1,0 +1,40 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "build convHankakuTxt",
+			"type": "shell",
+			"command": "gcc",
+			"args": [
+				"-g",
+				"\"${workspaceFolder}/linux/kernel/convHankakuTxt.c\"",
+				"-o",
+				"\"${workspaceFolder}/linux/kernel/output/convHankakuTxt.out\""
+			]
+		},
+		{
+			"label": "build test",
+			"type": "shell",
+			"command": "gcc",
+			"args": [
+				"-m32",
+				"-g",
+				"\"${workspaceFolder}/linux/test/test.c\"",
+				"-o",
+				"\"${workspaceFolder}/linux/test/test.out\""
+			]
+		},
+		{
+			"label": "suos make debug",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-c",
+				"make",
+				"-C",
+				"\"${workspaceFolder}/linux/\"",
+				"debug"
+			]
+		}
+	]
+}

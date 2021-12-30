@@ -17,7 +17,7 @@ GID = $(shell id -g)
 
 .PHONY: list clean kernel
 
-build: $(IMG) kernel copy
+build: kernel $(IMG) 
 	@echo "=========================="
 	@echo "|| build su_img success ||"
 	@echo "=========================="
@@ -54,8 +54,10 @@ $(OUT_BIN) : suos.nas Makefile output
 	nasm -o $@ -l $(OUT_LST) $<   
 # nasm -o $(OUT_FLOPPY) -l $(OUTPUT)/floppy.lst floppy.nas
 
-$(IMG): $(OUT_BIN)  
+$(IMG): $(OUT_BIN)  $(KERNEL)
+# 制作一个 1.44MB 的文件用于作为软盘文件
 	$(EDIMG) $< $@
+	make copy
 
 $(OUTPUT): 
 	mkdir -p $(OUTPUT)
