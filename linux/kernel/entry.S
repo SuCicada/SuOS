@@ -114,14 +114,42 @@ protcseg:
   
   # Set up the stack pointer and call into C.
   movl    $start, %esp
-  
+#define KERNEL_CODE 0x00280000
+copy_main:
+  mov $start, %esi
+  mov $(0x00080000 / 4), %ecx
+  mov $KERNEL_CODE, %edi
+  call memcpy
+
+
+
+
 start_main:
-  call bootmain
+  # ljmp 0x0028
+  mov $(bootmain - start + 0x00280000) , %eax
+  pushl %eax
+  ret 
+  # call bootmain
 
   # If bootmain returns (it shouldn't), loop.
 spin:
   jmp spin
 
+# ================== memcpy ========================
+# from:  esi
+# size:  ecx
+# to:    edi
+memcpy:
+  # mov %eax, %esi
+  # mov %edx, %edi
+  mov (%esi), %eax
+  mov %eax, (%edi) 
+  add $4, %esi
+  add $4, %edi
+  loop memcpy
+  ret 
+
+#  ======================================================
 
 # Bootstrap GDT
 .p2align 2                                # force 4 byte alignment

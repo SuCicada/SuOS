@@ -23,7 +23,8 @@ build: kernel $(IMG)
 	@echo "=========================="
 kernel:
 	# nasm -o bootloader suos.nas
-	make -C kernel  build addr=0xc400 
+	make -C kernel  build 
+# addr=0xc400 
 
 # $(KERNEL):
 # 	cd ./kernel
@@ -51,7 +52,7 @@ umount:
 	$(UMOUNT) $(TMP_DIR) 
 
 $(OUT_BIN) : suos.nas Makefile output
-	nasm -o $@ -l $(OUT_LST) $<   
+	nasm -g -o $@ -l $(OUT_LST) $<   
 # nasm -o $(OUT_FLOPPY) -l $(OUTPUT)/floppy.lst floppy.nas
 
 $(IMG): $(OUT_BIN)  $(KERNEL)

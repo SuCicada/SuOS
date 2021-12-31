@@ -70,6 +70,7 @@ $(OUTPUT)/asmfunc.o: asmfunc.asm
 $(OUTPUT)/entry.o: entry.S mmu.h
 	gcc $(CFLAGS) -c -o $@ $<
 	objdump -S $@ > $(patsubst %.o, %.asm, $@)
+	../../bin/objconv.exe -fnasm $@ $(patsubst %.o, %2.asm, $@)
 
 $(OUTPUT)/main.o: main.c color.c hankaku.h asmfunc.h
 	gcc $(CFLAGS) -c -o $@ $< 

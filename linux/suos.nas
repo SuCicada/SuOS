@@ -57,7 +57,7 @@ retry:
     MOV     AH,0x00
     MOV     DL,0
     INT     0x13
-    JMP         
+    JMP     entry
 
 next:
     ; 内存段地址后移0x0020, 即 512B

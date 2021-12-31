@@ -39,7 +39,7 @@ void init_gdtidt(void)
 	/* 为我们的主程序准备
 		设定第二段段空间
 	 */
-	set_segmdesc(gdt + 2, LIMIT_BOTPAK, 0xc400, AR_CODE32_ER);
+	set_segmdesc(gdt + 2, 0x0007ffff, 0x00280000, AR_CODE32_ER);
 	// set_segmdesc(gdt+2, 0x000fffff, 0x00000000, 0x409a);
 	// set_segmdesc(gdt+3, 0x000fffff, 0x00280000, 0x409a);
 
