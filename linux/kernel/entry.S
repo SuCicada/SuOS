@@ -114,19 +114,19 @@ protcseg:
   
   # Set up the stack pointer and call into C.
   movl    $start, %esp
+
 #define KERNEL_CODE 0x00280000
 copy_main:
-  mov $start, %esi
+  mov $main, %esi
   mov $(0x00080000 / 4), %ecx
   mov $KERNEL_CODE, %edi
   call memcpy
 
 
-
-
 start_main:
   # ljmp 0x0028
-  mov $(bootmain - start + 0x00280000) , %eax
+  # mov $(bootmain - start + 0x00280000) , %eax
+  mov $0x00280000 , %eax
   pushl %eax
   ret 
   # call bootmain

@@ -10,3 +10,7 @@ http://takeisamemo.blogspot.com/2014/09/os30os-3-4.html
 sudo apt-get install gcc-multilib
 
 [汇编中bss,data,text,rodata,heap,stack段的作用](https://blog.csdn.net/BXD1314/article/details/38433837)
+
+https://github.com/llvm/llvm-project/releases/download/llvmorg-11.0.0/LLVM-11.0.0-win64.exe
+
+

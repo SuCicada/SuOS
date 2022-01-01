@@ -38,10 +38,10 @@ void init_gdtidt(void)
 
 	/* 为我们的主程序准备
 		设定第二段段空间
+		todo: 为什么还要设定一个第二段空间
 	 */
-	set_segmdesc(gdt + 2, 0x0007ffff, 0x00280000, AR_CODE32_ER);
-	// set_segmdesc(gdt+2, 0x000fffff, 0x00000000, 0x409a);
-	// set_segmdesc(gdt+3, 0x000fffff, 0x00280000, 0x409a);
+	set_segmdesc(gdt + 2, 0x000fffff, 0x00000000, AR_CODE32_ER);
+	set_segmdesc(gdt + 3, 0x000fffff, 0x00280000, AR_CODE32_ER);
 
 	/* 设定 ADR_GDT -> ADR_GDT+LIMIT_GDT 这段空间用于 GDT, 注册到 LGDT 寄存器 */
 	load_gdtr(LIMIT_GDT, ADR_GDT);
@@ -57,9 +57,10 @@ void init_gdtidt(void)
 		注册函数到IDT, 中断发生会执行
 		2<<3 : 代表属于2段, 低3位必须为0
 	*/
-	set_gatedesc(idt + 0x21, (int)asm_inthandler21, 2 << 3, AR_INTGATE32);
-	set_gatedesc(idt + 0x27, (int)asm_inthandler27, 2 << 3, AR_INTGATE32);
-	set_gatedesc(idt + 0x2c, (int)asm_inthandler2c, 2 << 3, AR_INTGATE32);
+	int int_seg_index = 3;
+	set_gatedesc(idt + 0x21, (int)asm_inthandler21, int_seg_index << 3, AR_INTGATE32);
+	set_gatedesc(idt + 0x27, (int)asm_inthandler27, int_seg_index << 3, AR_INTGATE32);
+	set_gatedesc(idt + 0x2c, (int)asm_inthandler2c, int_seg_index << 3, AR_INTGATE32);
 
 	return;
 }

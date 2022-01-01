@@ -1,6 +1,5 @@
 #include "header.h"
 // #include "hankaku.h"
-#include "utils.c"
 #include "color.h"
 
 /*
