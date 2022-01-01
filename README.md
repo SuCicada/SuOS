@@ -16,3 +16,6 @@ https://en.wikibooks.org/wiki/X86_Assembly/GNU_assembly_syntax
 https://zhuanlan.zhihu.com/p/272135463
 
 https://blog.csdn.net/baidu_39511645/article/details/78368112
+
+https://github.com/llvm/llvm-project/releases/download/llvmorg-11.0.0/LLVM-11.0.0-win64.exe
+

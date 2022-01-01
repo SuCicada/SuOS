@@ -23,10 +23,13 @@ LDFLAGS = -m elf_i386  -nostdlib -nostdinc
 SOURCE_FILES = asmfunc.asm asmfunc.h \
  	entry.S mmu.h \
 	convHankakuTxt.c hankaku.txt \
-	main.c color.c hankaku.h 
+	main.c color.c hankaku.h  utils.c
 # 注意，顺序很重要，entry 要在第一个
-OBJ_NAME = entry.o main.o asmfunc.o dsctbl.o int.o color.o
-OBJ_FILES = $(patsubst %, $(OUTPUT)/%, $(OBJ_NAME))
+ENTRY_OBJ = entry.o
+CODE_OBJ = main.o asmfunc.o dsctbl.o int.o color.o utils.o
+ENTRY_OBJ_FILES =  $(patsubst %, $(OUTPUT)/%, $(ENTRY_OBJ))
+CODE_OBJ_FILES += $(patsubst %, $(OUTPUT)/%, $(CODE_OBJ))
+OBJ_FILES = $(ENTRY_OBJ_FILES) + $(CODE_OBJ_FILES)
 
 .PHONY: clean $(OBJ_NAME) kernel success
 
@@ -56,30 +59,42 @@ build: info $(OUTPUT) $(SOURCE_FILES) $(OBJ_NAME) $(kernel) success
 # .ONESHELL:
 # SECTIONS = -j .text -j .data -j .rodata 
 SECTIONS = 
-$(kernel) : $(OBJ_FILES)
+$(kernel) : $(OUTPUT)/entry $(OUTPUT)/code
 # -Ttext 代表, 所有代码起始地址为 0xc400 ,即 entry 开始的地址
-	ld $(LDFLAGS) -N -e start -Ttext $(addr) -o $@.out $^ 
-	objcopy $(SECTIONS) -O binary $@.out $@ 
-	objdump $(SECTIONS) -S $@.out > $@.asm 
-	../../bin/objconv.exe -fnasm $@.out $@2.asm 
+# ld $(LDFLAGS) -N -e start -Ttext $(addr) -o $@.out $^
+	cat $^ > $@
 
-# ========== source files 
+
+$(OUTPUT)/entry: $(ENTRY_OBJ_FILES)
+	ld $(LDFLAGS) -N -e start -Ttext $(addr) -o $@.out $^
+	objcopy $(SECTIONS) -O binary $@.out $@
+	objdump $(SECTIONS) -S $@.out > $@.asm
+	../../bin/objconv.exe -fnasm $@.out $@2.asm
+
+$(OUTPUT)/code: $(CODE_OBJ_FILES)
+	ld $(LDFLAGS) -N -e bootmain -Ttext 0x00280000 -o $@.out $^
+	objcopy $(SECTIONS) -O binary $@.out $@
+	objdump $(SECTIONS) -S $@.out > $@.asm
+	../../bin/objconv.exe -fnasm $@.out $@2.asm
+	
+# ========== source files
 $(OUTPUT)/asmfunc.o: asmfunc.asm
 	nasm -g -f elf32 -o $@ $<
-	
+
 $(OUTPUT)/entry.o: entry.S mmu.h
 	gcc $(CFLAGS) -c -o $@ $<
 	objdump -S $@ > $(patsubst %.o, %.asm, $@)
 	../../bin/objconv.exe -fnasm $@ $(patsubst %.o, %2.asm, $@)
 
 $(OUTPUT)/main.o: main.c color.c hankaku.h asmfunc.h
-	gcc $(CFLAGS) -c -o $@ $< 
+	gcc $(CFLAGS) -c -o $@ $<
 	objdump -S $@ > $(patsubst %.o, %.asm, $@)
 	../../bin/objconv.exe -fnasm $@ $(patsubst %.o, %2.asm, $@)
 
 $(OUTPUT)/%.o: %.c
 	gcc $(CFLAGS) -c -o $@ $<
 	objdump -S $@ > $(patsubst %.o, %.asm, $@)
+	../../bin/objconv.exe -fnasm $@ $(patsubst %.o, %2.asm, $@)
 
 
 convHankakuTxt = $(OUTPUT)/convHankakuTxt

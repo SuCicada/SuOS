@@ -1,5 +1,9 @@
 #include "asmfunc.h"
 
+// 
+int int2str(int n, char* s);
+int su_sprintf(char* __stream, char* __format, ...);
+
 struct BootInfo {
     char cyls, leds, vmode, reserve; // 1 byte * 4 ;
     short scrnx, scrny;				 // 2 byte * 2 ; x_size, y_size

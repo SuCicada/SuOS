@@ -1,11 +1,12 @@
-int int2str(int n, char* s);
+#include "header.h"
+
 int su_sprintf(char* __stream, char* __format, ...) {
     char c;
     char* stream = __stream;
     char* arg = (char*)(&__format + 1);
     // printf("arg %d\n",*(int*)arg);
     int n;
-    while ((c = *__format) && c!=0) {
+    while ((c = *__format) && c != 0) {
         // printf("c %c\n",c);
         // printf("s %s\n",__stream);
         if (c == '%') {
