@@ -82,7 +82,7 @@ seta20.2:
   
   # Jump to next instruction, but in 32-bit code segment.
   # Switches processor into 32-bit mode.
-  ljmp    $PROT_MODE_CSEG, $protcseg
+  ljmp    $(1<<3), $protcseg
 msg:
   .asciz "\r\n\n\rmy kernel is runing jos"
   
@@ -105,7 +105,7 @@ over:
   .code32                     # Assemble for 32-bit mode
 protcseg:
   # Set up the protected-mode data segment registers
-  movw    $PROT_MODE_DSEG, %ax    # Our data segment selector
+  movw    $(2<<3), %ax    # Our data segment selector
   movw    %ax, %ds                # -> DS: Data Segment
   movw    %ax, %es                # -> ES: Extra Segment
   movw    %ax, %fs                # -> FS
@@ -159,7 +159,7 @@ gdt:
   SEG(STA_W, 0x0, 0xffffffff)	            # data seg
 
 gdtdesc:
-  .word   0x17                            # sizeof(gdt) - 1
+  .word   0x17                            # sizeof(gdt) - 1, 3<<3-1
   .long   gdt                             # address gdt
 
 # .fill 310

@@ -55,3 +55,7 @@ void init_gdtidt(void);
 
 /* color.h  */
 void init_palette();
+
+
+/* 键盘端口 */
+#define PORT_KEYDAT 0x0060

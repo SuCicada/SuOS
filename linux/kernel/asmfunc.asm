@@ -8,7 +8,7 @@ section .text
 	GLOBAL	write_mem8
 	GLOBAL	io_cli, io_sti
 	GLOBAL	io_read_eflags, io_store_eflags
-	GLOBAL	io_out8
+	GLOBAL	io_out8, io_in8	
 	GLOBAL	load_gdtr, load_idtr
 	GLOBAL 	asm_inthandler21, asm_inthandler2c, asm_inthandler27
 	EXTERN  inthandler21, inthandler2c, inthandler27
@@ -47,6 +47,13 @@ io_out8:
 	MOV		AL,	[ESP+8]		;data
 	OUT 	DX, AL
 	RET
+; char io_in8(int port);
+io_in8:
+	MOV		EDX, [ESP+4]	;port
+	MOV 	AX, 0
+	IN		AL, DX
+	RET
+
 
 ; void load_gdtr(int limit, int addr);
 ; ESP+6 -- ESP+7   2byte  段上限
@@ -65,21 +72,21 @@ load_idtr:
 	ret
 
 asm_inthandler21:
-	PUSH	ES
-	PUSH	DS
-	PUSHAD
-	MOV		EAX,ESP
-	PUSH	EAX
+	PUSHW	ES
+	PUSHW	DS
+	PUSHAL
+	MOVL		EAX,ESP
+	PUSHL	EAX
 	; 是为了C语言的 inthandler21 能顺利执行
-	MOV		AX,SS
-	MOV		DS,AX
-	MOV		ES,AX
+	MOVW		AX,SS
+	MOVW		DS,AX
+	MOVW		ES,AX
 	CALL	inthandler21
-	POP		EAX
-	POPAD
-	POP		DS
-	POP		ES
-	IRETD			; 中断返回
+	POPL		EAX
+	POPAL
+	POPW		DS
+	POPW		ES
+	IRET			; 中断返回
 
 asm_inthandler2c:
 	PUSH	ES

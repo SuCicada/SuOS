@@ -5,6 +5,7 @@ extern void io_cli();
 extern void io_sti();
 extern void io_store_eflags(int flag);
 extern void io_out8(int port, int data);
+extern char io_in8(int port);
 
 extern void load_idtr(int limit, int addr);
 extern void load_gdtr(int limit, int addr);
