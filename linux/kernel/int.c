@@ -41,7 +41,7 @@ void inthandler21(int* esp)
 	putfonts8_asc(0, 16, COL8_FFFFFF, s);
 
 	// for (;;) {
-		// io_hlt();
+	// io_hlt();
 	// }
 	return;
 }

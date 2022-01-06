@@ -30,6 +30,10 @@ void bootmain(void){
 	su_sprintf(s, "nihoa: %d %d", DISPLAY_Y_SIZE, 1234);
 	putfonts8_asc(15, 30, COL8_FFFFFF, s);
 
-	for (;;)
-		io_hlt();
+	int a;
+	for (;;){
+		putfonts8_asc(15, 30, a, s);
+		a++;
+	}
+		// io_hlt();
 }

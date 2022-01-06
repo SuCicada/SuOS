@@ -20,13 +20,13 @@ CFLAGS += -std=c99  -fno-stack-protector -g
 LDFLAGS = -m elf_i386  -nostdlib -nostdinc
 
 
-SOURCE_FILES = asmfunc.asm asmfunc.h \
+SOURCE_FILES = asmfunc.asm asmfunc.h asmfunc.S\
  	entry.S mmu.h \
 	convHankakuTxt.c hankaku.txt \
 	main.c color.c hankaku.h  utils.c
 # 注意，顺序很重要，entry 要在第一个
 ENTRY_OBJ = entry.o
-CODE_OBJ = main.o asmfunc.o dsctbl.o int.o color.o utils.o
+CODE_OBJ = main.o asmfunc.o asmfunc0.o dsctbl.o int.o color.o utils.o
 ENTRY_OBJ_FILES =  $(patsubst %, $(OUTPUT)/%, $(ENTRY_OBJ))
 CODE_OBJ_FILES += $(patsubst %, $(OUTPUT)/%, $(CODE_OBJ))
 OBJ_FILES = $(ENTRY_OBJ_FILES) + $(CODE_OBJ_FILES)
@@ -78,8 +78,13 @@ $(OUTPUT)/code: $(CODE_OBJ_FILES)
 	../../bin/objconv.exe -fnasm $@.out $@2.asm
 	
 # ========== source files
-$(OUTPUT)/asmfunc.o: asmfunc.asm
+$(OUTPUT)/asmfunc0.o: asmfunc.asm
 	nasm -g -f elf32 -o $@ $<
+
+gcc_cmd=\
+	gcc $(CFLAGS) -c -o $@ $< ;\
+	objdump -S $@ > $(patsubst %.o, %.asm, $@) ;\
+	../../bin/objconv.exe -fnasm $@ $(patsubst %.o, %2.asm, $@) ;\
 
 $(OUTPUT)/entry.o: entry.S mmu.h
 	gcc $(CFLAGS) -c -o $@ $<
@@ -96,6 +101,8 @@ $(OUTPUT)/%.o: %.c
 	objdump -S $@ > $(patsubst %.o, %.asm, $@)
 	../../bin/objconv.exe -fnasm $@ $(patsubst %.o, %2.asm, $@)
 
+$(OUTPUT)/%.o: %.S
+	$(gcc_cmd)
 
 convHankakuTxt = $(OUTPUT)/convHankakuTxt
 hankaku.h: hankaku.txt $(convHankakuTxt)

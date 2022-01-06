@@ -1,5 +1,5 @@
 set history filename /tmp/.gdb.history
 set history save on
 set history size 1000
-file kernel/output/code.out
+file output/code.out
 target remote win.ip:1234

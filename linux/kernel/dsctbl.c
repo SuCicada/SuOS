@@ -51,16 +51,19 @@ void init_gdtidt(void)
 	for (i = 0; i <= LIMIT_IDT / 8; i++) {
 		set_gatedesc(idt + i, 0, 0, 0);
 	}
-	load_idtr(LIMIT_IDT, ADR_IDT);
-
 	/* IDT设置
 		注册函数到IDT, 中断发生会执行
 		2<<3 : 代表属于2段, 低3位必须为0
 	*/
 	int int_seg_index = 2;
+	
+	for(i=0; i<256; i++){
+		set_gatedesc(idt+i, (int)asm_inthandler21, int_seg_index*8, 0x008e);
+	}
 	set_gatedesc(idt + 0x21, (int)asm_inthandler21, int_seg_index << 3, AR_INTGATE32);
 	set_gatedesc(idt + 0x27, (int)asm_inthandler27, int_seg_index << 3, AR_INTGATE32);
 	set_gatedesc(idt + 0x2c, (int)asm_inthandler2c, int_seg_index << 3, AR_INTGATE32);
+	load_idtr(LIMIT_IDT, ADR_IDT);
 
 	return;
 }

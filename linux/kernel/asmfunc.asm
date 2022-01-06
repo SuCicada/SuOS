@@ -71,22 +71,22 @@ load_idtr:
 	lidt	[esp + 6]
 	ret
 
-asm_inthandler21:
-	PUSHW	ES
-	PUSHW	DS
-	PUSHAL
-	MOVL		EAX,ESP
-	PUSHL	EAX
-	; 是为了C语言的 inthandler21 能顺利执行
-	MOVW		AX,SS
-	MOVW		DS,AX
-	MOVW		ES,AX
-	CALL	inthandler21
-	POPL		EAX
-	POPAL
-	POPW		DS
-	POPW		ES
-	IRET			; 中断返回
+; asm_inthandler21:
+; 	PUSH	ES
+; 	PUSH	DS
+; 	PUSHA
+; 	MOV		EAX,ESP
+; 	PUSH	EAX
+; 	; 是为了C语言的 inthandler21 能顺利执行
+; 	MOV		AX,SS
+; 	MOV		DS,AX
+; 	MOV		ES,AX
+; 	CALL	inthandler21
+; 	POP		EAX
+; 	POPA
+; 	POP		DS
+; 	POP		ES
+; 	IRET			; 中断返回
 
 asm_inthandler2c:
 	PUSH	ES
