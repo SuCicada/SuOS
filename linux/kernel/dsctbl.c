@@ -40,8 +40,8 @@ void init_gdtidt(void)
 		设定第二段段空间
 		todo: 这里大有文章, 需要以后慢慢研究, 目前只能保证能跑通
 	 */
-	set_segmdesc(gdt + 2, 0x000fffff, 0x00000000, AR_CODE32_ER);
-	set_segmdesc(gdt + 3, 0x0007ffff, 0x00280000, AR_CODE32_ER);
+	set_segmdesc(gdt + 2, 0x00280000+0x0007ffff, 0x00000000, AR_CODE32_ER);
+	// set_segmdesc(gdt + 3, 0x0007ffff, 0x00280000, AR_CODE32_ER);
 
 	/* 设定 ADR_GDT -> ADR_GDT+LIMIT_GDT 这段空间用于 GDT, 注册到 LGDT 寄存器 */
 	load_gdtr(LIMIT_GDT, ADR_GDT);
@@ -57,9 +57,9 @@ void init_gdtidt(void)
 	*/
 	int int_seg_index = 2;
 	
-	for(i=0; i<256; i++){
-		set_gatedesc(idt+i, (int)asm_inthandler21, int_seg_index*8, 0x008e);
-	}
+	// for(i=0; i<256; i++){
+	// 	set_gatedesc(idt+i, (int)asm_inthandler21, int_seg_index*8, 0x008e);
+	// }
 	set_gatedesc(idt + 0x21, (int)asm_inthandler21, int_seg_index << 3, AR_INTGATE32);
 	set_gatedesc(idt + 0x27, (int)asm_inthandler27, int_seg_index << 3, AR_INTGATE32);
 	set_gatedesc(idt + 0x2c, (int)asm_inthandler2c, int_seg_index << 3, AR_INTGATE32);
