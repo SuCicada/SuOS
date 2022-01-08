@@ -66,7 +66,7 @@ $(kernel) : $(OUTPUT)/entry $(OUTPUT)/code
 
 
 $(OUTPUT)/entry: $(ENTRY_OBJ_FILES)
-	ld $(LDFLAGS) -N -e start -Ttext $(addr) -o $@.out $^
+	ld $(LDFLAGS) -N -e entry -Ttext $(addr) -o $@.out $^
 	objcopy $(SECTIONS) -O binary $@.out $@
 	objdump $(SECTIONS) -S $@.out > $@.asm
 	../../bin/objconv.exe -fnasm $@.out $@2.asm
