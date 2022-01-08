@@ -1,7 +1,6 @@
 #include "asmfunc.h"
 
-// 
-int int2str(int n, char* s);
+
 int su_sprintf(char* __stream, char* __format, ...);
 
 struct BootInfo {

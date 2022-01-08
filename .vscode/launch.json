@@ -46,14 +46,14 @@
       "request": "launch",
       "args": [],
       "stopAtEntry": false,
-      "cwd": "c:/Users/ZQ091606/Documents/PROGRAM/GitHub/SuOS/linux/test/",
+      "cwd": "${workspaceFolder}/linux/test/",
       "environment": [],
-      "program": "c:/Users/ZQ091606/Documents/PROGRAM/GitHub/SuOS/linux/test/test.out",
+      "program": "/tmp/test.out",
       "internalConsoleOptions": "openOnSessionStart",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "externalConsole": false,
-      "preLaunchTask": "build test",
+      // "preLaunchTask": "build test",
       "setupCommands": [
         {
           "description": "Enable pretty-printing for gdb",

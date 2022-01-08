@@ -3,7 +3,9 @@
         {
             "name": "windows-gcc-x64",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/**",
+                "F:/MinGW/**",
+                "F:/MinGW/include/**"
             ],
             "defines": [
                 "_DEBUG",

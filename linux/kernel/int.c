@@ -37,7 +37,7 @@ void inthandler21(int* esp)
 	su_sprintf(s, "%d", data);
 //	boxfill8(binfo->vram, binfo->scrnx, COL8_000084, 0, 16, 15, 31);
 	// struct BootInfo *binfo = (struct BootInfo *) ADR_BOOTINFO;
-	boxfill8(COL8_000000, 0, 16, 15, 31);
+	boxfill8(COL8_000000, 0, 16,30, 31);
 	putfonts8_asc(0, 16, COL8_FFFFFF, s);
 
 	for (int i=0;i<10000;i++) {
