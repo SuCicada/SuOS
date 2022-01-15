@@ -16,8 +16,12 @@
 #define COL8_008484 14 // 暗い水色
 #define COL8_848484 15 // 暗い灰色
 
+#define FONT_X_SIZE 8
+#define FONT_Y_SIZE 16 
+
 void set_palette(int start, int end, unsigned char* rgb_table);
-void boxfill8(int color_flag, int x0, int y0, int x1, int y1);
+void boxfill8_s(int x0, int y0, int x1, int y1,int color_flag);
+void boxfill8(int x0, int y0, int x1, int y1,int color_flag);
 void putfont(int x, int y, char color, char* font);
 void putfonts8_asc(int x, int y, char color, char*);
 // void init_display_info(struct BootInfo* binfo);
@@ -29,4 +33,4 @@ int DISPLAY_X_SIZE;
 int DISPLAY_Y_SIZE;
 char* DISPLAY_ADDRE; // (char*)0xa0000;
 
-#define BACKGROUND COL8_008484
+#define BACK_COLOR COL8_008484

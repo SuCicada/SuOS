@@ -1,6 +1,10 @@
 #include "header.h"
 #include "color.h"
+// #include "queue.h"
 
+/* keyboard buffer */
+
+KEYBUF keybuf;
 void init_pic(void)
 /* PIC初始化 */
 {
@@ -26,23 +30,23 @@ void init_pic(void)
 void inthandler21(int* esp)
 /* 来自PS/2键盘的中断 */
 {
-//	putfonts8_asc(binfo->vram, binfo->scrnx, 0, 16, COL8_000084, "");
-	unsigned char data;
-	char s[4];
+	//	putfonts8_asc(binfo->vram, binfo->scrnx, 0, 16, COL8_000084, "");
 
 	//IRQ-01に受付完了を通知
 	io_out8(PIC0_OCW2, 0x61);
-	data = io_in8(PORT_KEYDAT);
+	unsigned char data = io_in8(PORT_KEYDAT);
+	queue_push(&keybuf.queue, data);
 
-	su_sprintf(s, "%d", data);
-//	boxfill8(binfo->vram, binfo->scrnx, COL8_000084, 0, 16, 15, 31);
-	// struct BootInfo *binfo = (struct BootInfo *) ADR_BOOTINFO;
-	boxfill8(COL8_000000, 0, 16,30, 31);
-	putfonts8_asc(0, 16, COL8_FFFFFF, s);
 
-	for (int i=0;i<10000;i++) {
-	// io_hlt();
-	}
+	// char tmp_string[50];
+	// su_sprintf(tmp_string, "0x%x", data);
+	// boxfill8(0, 0, 4 * FONT_X_SIZE, 31, COL8_000000);
+	// putfonts8_asc(0, 0, COL8_FFFFFF, tmp_string);
+
+	// for (int i = 0;i < 10000;i++) {
+		// io_hlt();
+	// }
+
 	return;
 }
 
@@ -50,7 +54,7 @@ void inthandler2c(int* esp)
 /* 来自PS/2鼠标的中断 */
 {
 	// struct BootInfo *binfo = (struct BootInfo *) ADR_BOOTINFO;
-	boxfill8(COL8_000000, 0, 0, 32 * 8 - 1, 15);
+	boxfill8(0, 0, 32 * 8 - 1, 15, COL8_000000);
 	putfonts8_asc(0, 0, COL8_FFFFFF, "INT 2C (IRQ-12) : PS/2 mouse");
 	for (;;) {
 		io_hlt();

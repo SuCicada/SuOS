@@ -1,12 +1,12 @@
 #include "asmfunc.h"
-
+#include "queue.h"
 
 int su_sprintf(char* __stream, char* __format, ...);
 
 struct BootInfo {
-    char cyls, leds, vmode, reserve; // 1 byte * 4 ;
-    short scrnx, scrny;				 // 2 byte * 2 ; x_size, y_size
-    char* vram;						 // 4 byte
+	char cyls, leds, vmode, reserve; // 1 byte * 4 ;
+	short scrnx, scrny;				 // 2 byte * 2 ; x_size, y_size
+	char* vram;						 // 4 byte
 };
 
 // 记录 boot 信息的地址
@@ -58,3 +58,9 @@ void init_palette();
 
 /* 键盘端口 */
 #define PORT_KEYDAT 0x0060
+
+struct KEYBUF {
+	Queue queue;
+	int size;
+};
+#define KEYBUF struct KEYBUF

@@ -11,22 +11,22 @@ void init_display_info(struct BootInfo* binfo) {
 
 void init_screen() {
     int xsize = DISPLAY_X_SIZE, ysize = DISPLAY_Y_SIZE;
-    boxfill8(BACKGROUND, 0, 0, xsize - 1, ysize - 29);
-    boxfill8(COL8_C6C6C6, 0, ysize - 28, xsize - 1, ysize - 28);
-    boxfill8(COL8_FFFFFF, 0, ysize - 27, xsize - 1, ysize - 27);
-    boxfill8(COL8_C6C6C6, 0, ysize - 26, xsize - 1, ysize - 1);
+    boxfill8(0, 0, xsize - 1, ysize - 29, BACK_COLOR);
+    boxfill8(0, ysize - 28, xsize - 1, ysize - 28, COL8_C6C6C6);
+    boxfill8(0, ysize - 27, xsize - 1, ysize - 27, COL8_FFFFFF);
+    boxfill8(0, ysize - 26, xsize - 1, ysize - 1, COL8_C6C6C6);
 
-    boxfill8(COL8_FFFFFF, 3, ysize - 24, 59, ysize - 24);
-    boxfill8(COL8_FFFFFF, 2, ysize - 24, 2, ysize - 4);
-    boxfill8(COL8_848484, 3, ysize - 4, 59, ysize - 4);
-    boxfill8(COL8_848484, 59, ysize - 23, 59, ysize - 5);
-    boxfill8(COL8_000000, 2, ysize - 3, 59, ysize - 3);
-    boxfill8(COL8_000000, 60, ysize - 24, 60, ysize - 3);
+    boxfill8(3, ysize - 24, 59, ysize - 24, COL8_FFFFFF);
+    boxfill8(2, ysize - 24, 2, ysize - 4, COL8_FFFFFF);
+    boxfill8(3, ysize - 4, 59, ysize - 4, COL8_848484);
+    boxfill8(59, ysize - 23, 59, ysize - 5, COL8_848484);
+    boxfill8(2, ysize - 3, 59, ysize - 3, COL8_000000);
+    boxfill8(60, ysize - 24, 60, ysize - 3, COL8_000000);
 
-    boxfill8(COL8_848484, xsize - 47, ysize - 24, xsize - 4, ysize - 24);
-    boxfill8(COL8_848484, xsize - 47, ysize - 23, xsize - 47, ysize - 4);
-    boxfill8(COL8_FFFFFF, xsize - 47, ysize - 3, xsize - 4, ysize - 3);
-    boxfill8(COL8_FFFFFF, xsize - 3, ysize - 24, xsize - 3, ysize - 3);
+    boxfill8(xsize - 47, ysize - 24, xsize - 4, ysize - 24, COL8_848484);
+    boxfill8(xsize - 47, ysize - 23, xsize - 47, ysize - 4, COL8_848484);
+    boxfill8(xsize - 47, ysize - 3, xsize - 4, ysize - 3, COL8_FFFFFF);
+    boxfill8(xsize - 3, ysize - 24, xsize - 3, ysize - 3, COL8_FFFFFF);
 }
 
 
@@ -86,12 +86,16 @@ void set_palette(int start, int end, unsigned char* rgb_table) {
 
 
 // ==================  draw =========================
-void boxfill8(int color_flag, int x0, int y0, int x1, int y1) {
+void boxfill8_s(int x0, int y0, int xs, int ys, int color_flag) {
+    boxfill8(x0,y0,x0+xs,y0+ys,color_flag);
+}
+void boxfill8(int x0, int y0, int x1, int y1, int color_flag) {
     for (int y = y0; y <= y1; y++)
         for (int x = x0; x <= x1; x++)
             ((char*)DISPLAY_ADDRE)[y * DISPLAY_X_SIZE + x] = color_flag;
 }
 
+/*  one font is 16 * 8  */
 void putfont(//char *vram,   // 4 byte
               //int xsize,    // 4 byte
     int x,        // 4 byte
@@ -120,7 +124,7 @@ void putfonts8_asc(int x, int y, char color, char* msg) {
     // msg = a;
     for (int i = 0; msg[i] != 0;i++) {
         int font = msg[i];
-        putfont(10 * i + x, y, color, hankaku[font]);
+        putfont(FONT_X_SIZE * i + x, y, color, hankaku[font]);
     }
 }
 

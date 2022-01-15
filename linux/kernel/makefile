@@ -20,13 +20,12 @@ CFLAGS += -std=c99  -fno-stack-protector -g
 LDFLAGS = -m elf_i386  -nostdlib -nostdinc
 
 
-SOURCE_FILES = asmfunc.asm asmfunc.h asmfunc.S\
- 	entry.S mmu.h \
-	convHankakuTxt.c hankaku.txt \
-	main.c color.c hankaku.h  utils.c
+SOURCE_FILES = $(wildcard *)
 # 注意，顺序很重要，entry 要在第一个
 ENTRY_OBJ = entry.o
-CODE_OBJ = main.o asmfunc.o asmfunc0.o dsctbl.o int.o color.o utils.o
+CODE_OBJ = main.o asmfunc.o asmfunc0.o utils.o \
+	dsctbl.o int.o color.o \
+	queue.o
 ENTRY_OBJ_FILES =  $(patsubst %, $(OUTPUT)/%, $(ENTRY_OBJ))
 CODE_OBJ_FILES += $(patsubst %, $(OUTPUT)/%, $(CODE_OBJ))
 OBJ_FILES = $(ENTRY_OBJ_FILES) + $(CODE_OBJ_FILES)
