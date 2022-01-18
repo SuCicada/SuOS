@@ -3,5 +3,5 @@
 # .vscode
 *.bin
 *.img
-.vscode/*.log
+.vscode/**.log
 

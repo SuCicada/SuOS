@@ -4,7 +4,9 @@
 
 /* keyboard buffer */
 
-KEYBUF keybuf;
+extern KEYBUF keybuf;
+extern Queue mousebuf;
+
 void init_pic(void)
 /* PIC初始化 */
 {
@@ -53,12 +55,17 @@ void inthandler21(int* esp)
 void inthandler2c(int* esp)
 /* 来自PS/2鼠标的中断 */
 {
-	// struct BootInfo *binfo = (struct BootInfo *) ADR_BOOTINFO;
-	boxfill8(0, 0, 32 * 8 - 1, 15, COL8_000000);
-	putfonts8_asc(0, 0, COL8_FFFFFF, "INT 2C (IRQ-12) : PS/2 mouse");
-	for (;;) {
-		io_hlt();
-	}
+
+	io_out8(PIC1_OCW2, 0x64);	/* 通知PIC IRQ-12 已经受理完毕 */
+	io_out8(PIC0_OCW2, 0x62);	/* 通知PIC IRQ-02 已经受理完毕 */
+	unsigned char data = io_in8(PORT_KEYDAT);
+	queue_push(&mousebuf, data);
+	
+	// boxfill8(0, 0, 32 * 8 - 1, 15, COL8_000000);
+	// putfonts8_asc(0, 0, COL8_FFFFFF, "INT 2C (IRQ-12) : PS/2 mouse");
+	// for (;;) {
+	// 	io_hlt();
+	// }
 }
 
 void inthandler27(int* esp)
