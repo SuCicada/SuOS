@@ -11,6 +11,8 @@ void keybuf_init();
 void keybuf_deal();
 
 void mousebuf_init();
+void mousebuf_deal();
+
 void init_keyboard();
 void enable_mouse();
 
@@ -28,6 +30,8 @@ void bootmain(void) {
 	char mouse[16 * 16];
 	init_display_info(binfo);
 	keybuf_init();
+	mousebuf_init();
+
 	init_gdtidt();
 	init_pic();
 	io_sti(); /* IDT/PIC的初始化已经完成，于是开放CPU的中断 */
@@ -62,7 +66,7 @@ void bootmain(void) {
 
 
 	int a;
-	io_cli();
+	// io_cli();
 	for (;;) {
 		// io_cli();
 		// boxfill8_s(15, 30, 10 * FONT_X_SIZE, FONT_Y_SIZE, BACK_COLOR);
@@ -73,7 +77,7 @@ void bootmain(void) {
 		putfonts8_asc(15, 30, a, "can click");
 		// for(int i=0;i<1000000;i++);
 		keybuf_deal();
-
+		mousebuf_deal();
 
 		a++;
 	}
@@ -117,14 +121,13 @@ void mousebuf_deal() {
 		unsigned char data = queue_pop(buf_ptr);
 
 		su_sprintf(tmp_string, "0x%x", data);
-		boxfill8(0, 3 * FONT_Y_SIZE, 5 * FONT_X_SIZE, 31, COL8_000000);
+		boxfill8_s(0, 3 * FONT_Y_SIZE, 5 * FONT_X_SIZE, FONT_Y_SIZE, COL8_000000);
 		putfonts8_asc(0, 3 * FONT_Y_SIZE, COL8_FFFFFF, tmp_string);
 
 		int size = queue_size(buf_ptr);
 		su_sprintf(tmp_string, "size: %d", size);
-		boxfill8(0, FONT_Y_SIZE * 6, 10 * FONT_X_SIZE, FONT_Y_SIZE * (5 + 1), COL8_000000);
+		boxfill8_s(0, FONT_Y_SIZE * 6, 10 * FONT_X_SIZE, FONT_Y_SIZE , COL8_000000);
 		putfonts8_asc(0, FONT_Y_SIZE * 6, COL8_FFFFFF, tmp_string);
-
 	}
 	io_sti();
 }
@@ -164,4 +167,46 @@ void enable_mouse(void) {
 	wait_KBC_sendready();
 	io_out8(PORT_KEYDAT, MOUSECMD_ENABLE);
 	return; /* 顺利的话，键盘控制器会返回ACK(0xfa) */
+}
+
+
+void .//_mouse_cursor8(char* mouse, char bg) {
+    char outline = COL8_000000;
+    char inside = COL8_FFFFFF;
+    const static char cursor[16][16] = {
+        "**************..",
+        "*OOOOOOOOOOO*...",
+        "*OOOOOOOOOO*....",
+        "*OOOOOOOOO*.....",
+        "*OOOOOOOO*......",
+        "*OOOOOOO*.......",
+        "*OOOOOOO*.......",
+        "*OOOOOOOO*......",
+        "*OOOO**OOO*.....",
+        "*OOO*..*OOO*....",
+        "*OO*....*OOO*...",
+        "*O*......*OOO*..",
+        "**........*OOO*.",
+        "*..........*OOO*",
+        "............*OO*",
+        ".............***"
+    };
+    char m;
+    for (int x = 0; x < 16; x++) {
+        for (int y = 0; y < 16; y++) {
+            char c = cursor[x][y];
+            switch (c) {
+            case 'O':
+                m = inside;
+                break;
+            case '*':
+                m = outline;
+                break;
+            case '.':
+                m = bg;
+                break;
+            }
+            mouse[y * 16 + x] = m;
+        }
+    }
 }

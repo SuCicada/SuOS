@@ -60,7 +60,12 @@ void inthandler2c(int* esp)
 	io_out8(PIC0_OCW2, 0x62);	/* 通知PIC IRQ-02 已经受理完毕 */
 	unsigned char data = io_in8(PORT_KEYDAT);
 	queue_push(&mousebuf, data);
-	
+
+	// char tmp_string[50];
+	// 	su_sprintf(tmp_string, "0x%x", data);
+	// 	boxfill8(0, 16, 4 * FONT_X_SIZE, 31, COL8_000000);
+	// 	putfonts8_asc(0, 16, COL8_FFFFFF, tmp_string);
+
 	// boxfill8(0, 0, 32 * 8 - 1, 15, COL8_000000);
 	// putfonts8_asc(0, 0, COL8_FFFFFF, "INT 2C (IRQ-12) : PS/2 mouse");
 	// for (;;) {
