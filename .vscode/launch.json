@@ -41,6 +41,28 @@
       ]
     },
     {
+      "name": "test-linux",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/linux/output/test.out",
+      // "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/linux/test/",
+      "environment": [],
+      "MIMode": "gdb",
+      "miDebuggerPath": "gdb",
+      "miDebuggerServerAddress": "ubuntu.wsl:1234",
+      // "linux": {
+      //   "MIMode": "gdb"
+      // },
+      // "setupCommands": [
+      //   {
+      //     "description": "Enable pretty-printing for gdb",
+      //     "text": "-enable-pretty-printing",
+      //     "ignoreFailures": true
+      //   }
+      // ]
+    },
+    {
       "name": "test",
       "type": "cppdbg",
       "request": "launch",
@@ -48,35 +70,12 @@
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}/linux/test/",
       "environment": [],
-      "program": "/tmp/test.out",
+      "program": "${workspaceFolder}/linux/output/test.out",
       "internalConsoleOptions": "openOnSessionStart",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "externalConsole": false,
       // "preLaunchTask": "build test",
-      "setupCommands": [
-        {
-          "description": "Enable pretty-printing for gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
-        }
-      ]
-    },
-    {
-      "name": "C/C++ Runner: Debug Session",
-      "type": "cppdbg",
-      "request": "launch",
-      "args": [
-        ""
-      ],
-      "stopAtEntry": false,
-      "cwd": "c:/Users/ZQ091606/Documents/PROGRAM/GitHub/SuOS/linux/kernel",
-      "environment": [],
-      "program": "c:/Users/ZQ091606/Documents/PROGRAM/GitHub/SuOS/linux/kernel/build/Debug/outDebug",
-      "internalConsoleOptions": "openOnSessionStart",
-      "MIMode": "gdb",
-      "miDebuggerPath": "C:/TOOL/mingw-w64/x86_64-8.1.0-win32-seh-rt_v6-rev0/mingw64/bin/gdb",
-      "externalConsole": false,
       "setupCommands": [
         {
           "description": "Enable pretty-printing for gdb",

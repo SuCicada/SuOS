@@ -3,40 +3,73 @@ int int2str(int n, char* s);
 int int2hexstr(int n, char* s);
 int int2basestr(int n, char* s, int base);
 
+#define charIsNum(c) (c >= '0' && c <= '9')
+#define char2Num(c) (c - '0')
+
+char temp_str[20];
 int su_sprintf(char* __stream, char* __format, ...) {
     char c;
     char* stream = __stream;
     char* arg = (char*)(&__format + 1);
     // printf("arg %d\n",*(int*)arg);
     int n;
-    int len;
-    while ((c = *__format) && c != 0) {
+    int match_num_len; // len of % match num 
+
+    while ((c = *(__format++)) && c != 0) {
         // printf("c %c\n",c);
         // printf("s %s\n",__stream);
         if (c == '%') {
-            __format++;
-            c = *__format;
+            // prepare get next char
+            char c1 = *(__format);
+            char c2 = *(__format + 1);
+
+            int prefix_size = 0;
+            int prefix_char = ' ';
+            if (charIsNum(c2)) {
+                // eg: %03d , %-3d
+                // __format++;
+                // char cc = *(__format + 1);
+                // if (charIsNum(c1)) {
+                prefix_char = c1;
+                prefix_size = char2Num(c2);
+                __format += 2;
+                // __format++;
+            }
+            else if (charIsNum(c1)) {
+                // eg: %3d
+                prefix_size = char2Num(c1);
+                __format++;
+            }
+
+            c = *(__format++);
             switch (c) {
+            case 'x':
             case 'd':
                 n = *(int*)arg;
                 arg += sizeof(int);
-                len = int2str(n, stream);
-                stream += len;
+                switch (c) {
+                case 'd': match_num_len = int2str(n, temp_str); break;
+                case 'x': match_num_len = int2hexstr(n, temp_str); break;
+                }
+                // 填补数字前缀
+                if (match_num_len < prefix_size) {
+                    for (int i = 0;i < prefix_size - match_num_len;i++) {
+                        *(stream++) = prefix_char;
+                    }
+                }
+                for (int i = 0;i < match_num_len;i++) {
+                    *(stream++) = temp_str[i];
+                }
                 break;
-            case 'x':
-                n = *(int*)arg;
-                arg += sizeof(int);
-                len = int2hexstr(n, stream);
-                stream += len;
-                break;
+            case '%':
+                *(stream++) = '%';
                 break;
             }
         }
         else {
-            *stream = c;
-            stream++;
+            *(stream++) = c;
         }
-        __format++;
+        // __format++;
     }
     *stream = '\0';
     return 0;

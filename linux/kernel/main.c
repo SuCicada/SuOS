@@ -45,7 +45,7 @@ void bootmain(void) {
 	su_sprintf(tmp_string, "DISPLAY_X_SIZE = %d ", DISPLAY_X_SIZE);
 	putfonts8_asc(5, 10, COL8_FFFFFF, tmp_string);
 
-	init_mouse_cursor8(mouse, BACK_COLOR);
+	// init_mouse_cursor8(mouse, BACK_COLOR);
 	putblock(100, 100, 16, 16, mouse);
 
 	init_keyboard();
@@ -112,22 +112,42 @@ void mousebuf_init() {
 	int size = sizeof(mousebuf_mem) / sizeof(unsigned char);
 	queue_init(&mousebuf, mousebuf_mem, size);
 }
-
+int mousebuf_group_flag = -1; // a gropu has 3
+int mousebuf_group[3]; // a gropu has 3
 void mousebuf_deal() {
 	io_cli();
 	// for(int i=0;i<100000;i++);
 	Queue* buf_ptr = &mousebuf;
+	unsigned char data;
 	if (!queue_empty(buf_ptr)) {
-		unsigned char data = queue_pop(buf_ptr);
+		if (mousebuf_group_flag == -1) {
+			data = queue_pop(buf_ptr);
+			if (data == 0xfa) {
+				// 等待鼠标的
+				mousebuf_group_flag = 0;
+			}
+		}
+		if (mousebuf_group_flag == 3) {
+			mousebuf_group_flag = 0;
+			// show
+			for (int i = 0; i < 3; i++) {
+				data = mousebuf_group[i];
+				su_sprintf(tmp_string, "0x%02x", data);
+				int x = FONT_X_SIZE * (i * 5);
+				boxfill8_s(x, 3 * FONT_Y_SIZE, 5 * FONT_X_SIZE, FONT_Y_SIZE, COL8_000000);
+				putfonts8_asc(x, 3 * FONT_Y_SIZE, COL8_FFFFFF, tmp_string);
+			}
+		}
+		else {
+			data = queue_pop(buf_ptr);
+			mousebuf_group[mousebuf_group_flag++] = data;
+		}
 
-		su_sprintf(tmp_string, "0x%x", data);
-		boxfill8_s(0, 3 * FONT_Y_SIZE, 5 * FONT_X_SIZE, FONT_Y_SIZE, COL8_000000);
-		putfonts8_asc(0, 3 * FONT_Y_SIZE, COL8_FFFFFF, tmp_string);
+		// int size = queue_size(buf_ptr);
+		// su_sprintf(tmp_string, "size: %d", size);
+		// boxfill8_s(0, FONT_Y_SIZE * 6, 10 * FONT_X_SIZE, FONT_Y_SIZE , COL8_000000);
+		// putfonts8_asc(0, FONT_Y_SIZE * 6, COL8_FFFFFF, tmp_string);
 
-		int size = queue_size(buf_ptr);
-		su_sprintf(tmp_string, "size: %d", size);
-		boxfill8_s(0, FONT_Y_SIZE * 6, 10 * FONT_X_SIZE, FONT_Y_SIZE , COL8_000000);
-		putfonts8_asc(0, FONT_Y_SIZE * 6, COL8_FFFFFF, tmp_string);
 	}
 	io_sti();
 }
@@ -170,43 +190,43 @@ void enable_mouse(void) {
 }
 
 
-void .//_mouse_cursor8(char* mouse, char bg) {
-    char outline = COL8_000000;
-    char inside = COL8_FFFFFF;
-    const static char cursor[16][16] = {
-        "**************..",
-        "*OOOOOOOOOOO*...",
-        "*OOOOOOOOOO*....",
-        "*OOOOOOOOO*.....",
-        "*OOOOOOOO*......",
-        "*OOOOOOO*.......",
-        "*OOOOOOO*.......",
-        "*OOOOOOOO*......",
-        "*OOOO**OOO*.....",
-        "*OOO*..*OOO*....",
-        "*OO*....*OOO*...",
-        "*O*......*OOO*..",
-        "**........*OOO*.",
-        "*..........*OOO*",
-        "............*OO*",
-        ".............***"
-    };
-    char m;
-    for (int x = 0; x < 16; x++) {
-        for (int y = 0; y < 16; y++) {
-            char c = cursor[x][y];
-            switch (c) {
-            case 'O':
-                m = inside;
-                break;
-            case '*':
-                m = outline;
-                break;
-            case '.':
-                m = bg;
-                break;
-            }
-            mouse[y * 16 + x] = m;
-        }
-    }
+void deal_mouse_cursor8(char* mouse, char bg) {
+	char outline = COL8_000000;
+	char inside = COL8_FFFFFF;
+	const static char cursor[16][16] = {
+		"**************..",
+		"*OOOOOOOOOOO*...",
+		"*OOOOOOOOOO*....",
+		"*OOOOOOOOO*.....",
+		"*OOOOOOOO*......",
+		"*OOOOOOO*.......",
+		"*OOOOOOO*.......",
+		"*OOOOOOOO*......",
+		"*OOOO**OOO*.....",
+		"*OOO*..*OOO*....",
+		"*OO*....*OOO*...",
+		"*O*......*OOO*..",
+		"**........*OOO*.",
+		"*..........*OOO*",
+		"............*OO*",
+		".............***"
+	};
+	char m;
+	for (int x = 0; x < 16; x++) {
+		for (int y = 0; y < 16; y++) {
+			char c = cursor[x][y];
+			switch (c) {
+			case 'O':
+				m = inside;
+				break;
+			case '*':
+				m = outline;
+				break;
+			case '.':
+				m = bg;
+				break;
+			}
+			mouse[y * 16 + x] = m;
+		}
+	}
 }

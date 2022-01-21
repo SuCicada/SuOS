@@ -5,7 +5,8 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "F:/MinGW/**",
-                "F:/MinGW/include/**"
+                "F:/MinGW/include/**",
+                "C:/TOOL/mingw-w64/x86_64-8.1.0-win32-seh-rt_v6-rev0/mingw64/**"
             ],
             "defines": [
                 "_DEBUG",
