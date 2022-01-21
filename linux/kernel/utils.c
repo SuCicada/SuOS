@@ -76,23 +76,38 @@ int su_sprintf(char* __stream, char* __format, ...) {
 }
 
 int int2str(int n, char* s) {
-    return int2basestr(n, s, 10);
+    int flag_size = 0;
+    if (n < 0) {
+        *(s++) = '-';
+        n = -n;
+        flag_size = 1;
+    }
+    return int2basestr(n, s, 10) + flag_size;
+}
+int basechar2int(char c) {
+    if (charIsNum(c)) return c - '0';
+    else return c - 'a' + 10;
+}
+char int2basechar(int n) {
+    if (n < 10) return '0' + n;
+    else return 'a' + n - 10;
 }
 int int2hexstr(int n, char* s) {
-    return int2basestr(n, s, 16);
+    if (n < 0) {
+        n = 0x7fffffff + n + 1;
+        // n = 1<<32
+    }
+    int res = int2basestr(n, s, 16);
+    // 最高位设置为 1
+    s[0] = int2basechar(basechar2int(s[0]) + 8);
+    return res;
 }
 
 int int2basestr(int n, char* s, int base) {
     int flag = 0;
     do {
         int rem = n % base;
-        int c;
-        if (rem < 10) {
-            c = '0' + rem;
-        }
-        else {
-            c = 'a' + rem - 10;
-        }
+        char c = int2basechar(rem);
         s[flag++] = c;
         n /= base;
     } while (n);

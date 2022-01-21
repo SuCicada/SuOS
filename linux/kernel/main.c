@@ -112,43 +112,65 @@ void mousebuf_init() {
 	int size = sizeof(mousebuf_mem) / sizeof(unsigned char);
 	queue_init(&mousebuf, mousebuf_mem, size);
 }
-int mousebuf_group_flag = -1; // a gropu has 3
-int mousebuf_group[3]; // a gropu has 3
+struct MOUSE_DEC {
+	int group_flag; // a gropu has 3
+	unsigned char group[3]; // a gropu has 3
+	int x, y, btn;
+};
+struct MOUSE_DEC mouse_dec;
+
 void mousebuf_deal() {
 	io_cli();
 	// for(int i=0;i<100000;i++);
 	Queue* buf_ptr = &mousebuf;
 	unsigned char data;
 	if (!queue_empty(buf_ptr)) {
-		if (mousebuf_group_flag == -1) {
-			data = queue_pop(buf_ptr);
+		data = queue_pop(buf_ptr);
+		if (mouse_dec.group_flag == -1) {
 			if (data == 0xfa) {
 				// 等待鼠标的
-				mousebuf_group_flag = 0;
-			}
-		}
-		if (mousebuf_group_flag == 3) {
-			mousebuf_group_flag = 0;
-			// show
-			for (int i = 0; i < 3; i++) {
-				data = mousebuf_group[i];
-				su_sprintf(tmp_string, "0x%02x", data);
-				int x = FONT_X_SIZE * (i * 5);
-				boxfill8_s(x, 3 * FONT_Y_SIZE, 5 * FONT_X_SIZE, FONT_Y_SIZE, COL8_000000);
-				putfonts8_asc(x, 3 * FONT_Y_SIZE, COL8_FFFFFF, tmp_string);
+				mouse_dec.group_flag = 0;
 			}
 		}
 		else {
-			data = queue_pop(buf_ptr);
-			mousebuf_group[mousebuf_group_flag++] = data;
+			if ((mouse_dec.group_flag == 0 &&
+				((data & 0xc8) == 0x08)) ||
+				mouse_dec.group_flag > 0) {
+				mouse_dec.group[mouse_dec.group_flag++] = data;
+			}
+			else {
+				// // int size = queue_size(buf_ptr);
+				// su_sprintf(tmp_string, "size: %d %x", mouse_dec.group_flag, data& 0xc8);
+				// boxfill8_s(0, FONT_Y_SIZE * 6, 10 * FONT_X_SIZE, FONT_Y_SIZE, COL8_000000);
+				// putfonts8_asc(0, FONT_Y_SIZE * 6, COL8_FFFFFF, tmp_string);
+
+			}
 		}
-
-		// int size = queue_size(buf_ptr);
-		// su_sprintf(tmp_string, "size: %d", size);
-		// boxfill8_s(0, FONT_Y_SIZE * 6, 10 * FONT_X_SIZE, FONT_Y_SIZE , COL8_000000);
-		// putfonts8_asc(0, FONT_Y_SIZE * 6, COL8_FFFFFF, tmp_string);
-
 	}
+
+	if (mouse_dec.group_flag == 3) {
+		mouse_dec.group_flag = 0;
+		// show
+		unsigned char m0 = mouse_dec.group[0];
+		mouse_dec.btn = m0 & 0x07; // 0b0111
+		mouse_dec.x = mouse_dec.group[1];
+		mouse_dec.y = mouse_dec.group[2];
+		if (m0 & 0x10) // 0b0001 0000
+			mouse_dec.x != 0xffffff00;
+		if (m0 & 0x20) // 0b0010 0000
+			mouse_dec.y != 0xffffff00;
+		// mouse_dec.y = -mouse_dec.y;
+
+		int tmp[3] = { mouse_dec.btn,mouse_dec.x,mouse_dec.y };
+		for (int i = 0; i < 3; i++) {
+			int n = tmp[i];
+			su_sprintf(tmp_string, "%d", n);
+			int x = FONT_X_SIZE * (i * 5);
+			boxfill8_s(x, 3 * FONT_Y_SIZE, 5 * FONT_X_SIZE, FONT_Y_SIZE, COL8_000000);
+			putfonts8_asc(x, 3 * FONT_Y_SIZE, COL8_FFFFFF, tmp_string);
+		}
+	}
+
 	io_sti();
 }
 
@@ -186,6 +208,7 @@ void enable_mouse(void) {
 	io_out8(PORT_KEYCMD, KEYCMD_SENDTO_MOUSE);
 	wait_KBC_sendready();
 	io_out8(PORT_KEYDAT, MOUSECMD_ENABLE);
+	mouse_dec.group_flag = -1;
 	return; /* 顺利的话，键盘控制器会返回ACK(0xfa) */
 }
 
