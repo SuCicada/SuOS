@@ -29,8 +29,8 @@ void init_mouse_cursor8(char* mouse, char bg);
 void putblock(int x, int y, int xsize, int ysize, char* vblock);
 void init_screen();
 
-int DISPLAY_X_SIZE;
-int DISPLAY_Y_SIZE;
-char* DISPLAY_ADDRE; // (char*)0xa0000;
+extern int DISPLAY_X_SIZE;
+extern int DISPLAY_Y_SIZE;
+extern char* DISPLAY_ADDRE; // (char*)0xa0000;
 
 #define BACK_COLOR COL8_008484

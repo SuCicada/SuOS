@@ -17,7 +17,7 @@ CFLAGS += -m32 -march=i486
 CFLAGS += -std=c99  -fno-stack-protector -g
 
 
-LDFLAGS = -m elf_i386  -nostdlib -nostdinc
+LDFLAGS = -m elf_i386  -nostdlib #-nostdinc
 
 
 SOURCE_FILES = $(wildcard *)
@@ -56,8 +56,8 @@ build: info $(OUTPUT) $(SOURCE_FILES) $(OBJ_NAME) $(kernel) success
 # https://linux.die.net/man/1/ld
 # https://sites.ualberta.ca/dept/chemeng/AIX-43/share/man/info/C/a_doc_lib/cmds/aixcmds3/ld.htm
 # .ONESHELL:
-# SECTIONS = -j .text -j .data -j .rodata 
-SECTIONS = 
+SECTIONS = -j .text -j .data -j .rodata 
+# SECTIONS = 
 $(kernel) : $(OUTPUT)/entry $(OUTPUT)/code
 # -Ttext 代表, 所有代码起始地址为 0xc400 ,即 entry 开始的地址
 # ld $(LDFLAGS) -N -e start -Ttext $(addr) -o $@.out $^
@@ -68,13 +68,13 @@ $(OUTPUT)/entry: $(ENTRY_OBJ_FILES)
 	ld $(LDFLAGS) -N -e entry -Ttext $(addr) -o $@.out $^
 	objcopy $(SECTIONS) -O binary $@.out $@
 	objdump $(SECTIONS) -S $@.out > $@.asm
-	../../bin/objconv.exe -fnasm $@.out $@2.asm
+	objconv -fnasm $@.out $@2.asm
 
 $(OUTPUT)/code: $(CODE_OBJ_FILES)
 	ld $(LDFLAGS) -N -e bootmain -Ttext 0x00280000 -o $@.out $^
 	objcopy $(SECTIONS) -O binary $@.out $@
 	objdump $(SECTIONS) -S $@.out > $@.asm
-	../../bin/objconv.exe -fnasm $@.out $@2.asm
+	objconv -fnasm $@.out $@2.asm
 	
 # ========== source files
 $(OUTPUT)/asmfunc0.o: asmfunc.asm
@@ -83,22 +83,22 @@ $(OUTPUT)/asmfunc0.o: asmfunc.asm
 gcc_cmd=\
 	gcc $(CFLAGS) -c -o $@ $< ;\
 	objdump -S $@ > $(patsubst %.o, %.asm, $@) ;\
-	../../bin/objconv.exe -fnasm $@ $(patsubst %.o, %2.asm, $@) ;\
+	objconv -fnasm $@ $(patsubst %.o, %2.asm, $@) ;\
 
 $(OUTPUT)/entry.o: entry.S mmu.h
 	gcc $(CFLAGS) -c -o $@ $<
 	objdump -S $@ > $(patsubst %.o, %.asm, $@)
-	../../bin/objconv.exe -fnasm $@ $(patsubst %.o, %2.asm, $@)
+	objconv -fnasm $@ $(patsubst %.o, %2.asm, $@)
 
 $(OUTPUT)/main.o: main.c color.c hankaku.h asmfunc.h
 	gcc $(CFLAGS) -c -o $@ $<
 	objdump -S $@ > $(patsubst %.o, %.asm, $@)
-	../../bin/objconv.exe -fnasm $@ $(patsubst %.o, %2.asm, $@)
+	objconv -fnasm $@ $(patsubst %.o, %2.asm, $@)
 
 $(OUTPUT)/%.o: %.c
 	gcc $(CFLAGS) -c -o $@ $<
 	objdump -S $@ > $(patsubst %.o, %.asm, $@)
-	../../bin/objconv.exe -fnasm $@ $(patsubst %.o, %2.asm, $@)
+	objconv -fnasm $@ $(patsubst %.o, %2.asm, $@)
 
 $(OUTPUT)/%.o: %.S
 	$(gcc_cmd)

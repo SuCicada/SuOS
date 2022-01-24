@@ -2,6 +2,9 @@
 #include "header.h"
 #include "color.h"
 
+int DISPLAY_X_SIZE;
+int DISPLAY_Y_SIZE;
+char* DISPLAY_ADDRE; // (char*)0xa0000;
 
 void init_display_info(struct BootInfo* binfo) {
     DISPLAY_ADDRE = binfo->vram;
@@ -136,4 +139,3 @@ void putblock(int x, int y, int xsize, int ysize, char* vblock) {
         }
     }
 }
-
