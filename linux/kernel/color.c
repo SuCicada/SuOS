@@ -90,7 +90,7 @@ void set_palette(int start, int end, unsigned char* rgb_table) {
 
 // ==================  draw =========================
 void boxfill8_s(int x0, int y0, int xs, int ys, int color_flag) {
-    boxfill8(x0,y0,x0+xs,y0+ys,color_flag);
+    boxfill8(x0, y0, x0 + xs, y0 + ys, color_flag);
 }
 void boxfill8(int x0, int y0, int x1, int y1, int color_flag) {
     for (int y = y0; y <= y1; y++)
@@ -130,12 +130,23 @@ void putfonts8_asc(int x, int y, char color, char* msg) {
         putfont(FONT_X_SIZE * i + x, y, color, hankaku[font]);
     }
 }
+void getblock(int x, int y, int xsize, int ysize, char* vblock) {
+    for (int i = 0; i < xsize; i++) {
+        for (int j = 0; j < ysize; j++) {
+            int display_size = (y + j) * DISPLAY_X_SIZE + x + i;
+            vblock[j * xsize + i] = DISPLAY_ADDRE[display_size];
+        }
+    }
+}
 
 void putblock(int x, int y, int xsize, int ysize, char* vblock) {
     for (int i = 0; i < xsize; i++) {
         for (int j = 0; j < ysize; j++) {
             int display_size = (y + j) * DISPLAY_X_SIZE + x + i;
-            DISPLAY_ADDRE[display_size] = vblock[j * xsize + i];
+            char c = vblock[j * xsize + i];// color
+            if (c >= 0) {
+                DISPLAY_ADDRE[display_size] = c;
+            }
         }
     }
 }

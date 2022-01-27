@@ -23,10 +23,12 @@ void set_palette(int start, int end, unsigned char* rgb_table);
 void boxfill8_s(int x0, int y0, int x1, int y1,int color_flag);
 void boxfill8(int x0, int y0, int x1, int y1,int color_flag);
 void putfont(int x, int y, char color, char* font);
+
 void putfonts8_asc(int x, int y, char color, char*);
 // void init_display_info(struct BootInfo* binfo);
-void init_mouse_cursor8(char* mouse, char bg);
+void init_mouse_cursor8(char* mouse);
 void putblock(int x, int y, int xsize, int ysize, char* vblock);
+void getblock(int x, int y, int xsize, int ysize, char* vblock);
 void init_screen();
 
 extern int DISPLAY_X_SIZE;

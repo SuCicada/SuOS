@@ -23,11 +23,11 @@ unsigned char keybuf_mem[32]; // 为了能初始化固定的内存空间
 
 Queue mousebuf;
 unsigned char mousebuf_mem[32]; // 为了能初始化固定的内存空间
+char mouse_cursor[16 * 16];
 
 void bootmain(void) {
 
 	struct BootInfo* binfo = (struct BootInfo*)ADR_BOOTINFO;
-	char mouse[16 * 16];
 	init_display_info(binfo);
 	keybuf_init();
 	mousebuf_init();
@@ -45,8 +45,7 @@ void bootmain(void) {
 	su_sprintf(tmp_string, "DISPLAY_X_SIZE = %d ", DISPLAY_X_SIZE);
 	putfonts8_asc(5, 10, COL8_FFFFFF, tmp_string);
 
-	// init_mouse_cursor8(mouse, BACK_COLOR);
-	putblock(100, 100, 16, 16, mouse);
+	init_mouse_cursor8(mouse_cursor);
 
 	init_keyboard();
 	enable_mouse();
@@ -117,7 +116,12 @@ struct MOUSE_DEC {
 	unsigned char group[3]; // a gropu has 3
 	int x, y, btn;
 };
+
 struct MOUSE_DEC mouse_dec;
+
+int mouse_now_site_x;
+int mouse_now_site_y;
+char mouse_screen_origin[16 * 16];
 
 void mousebuf_deal() {
 	io_cli();
@@ -153,15 +157,17 @@ void mousebuf_deal() {
 		// show
 		unsigned char m0 = mouse_dec.group[0];
 		mouse_dec.btn = m0 & 0x07; // 0b0111
-		mouse_dec.x = mouse_dec.group[1];
-		mouse_dec.y = mouse_dec.group[2];
+		mouse_dec.x = (char)mouse_dec.group[1];
+		mouse_dec.y = (char)mouse_dec.group[2];
 		if (m0 & 0x10) // 0b0001 0000
 			mouse_dec.x != 0xffffff00;
 		if (m0 & 0x20) // 0b0010 0000
 			mouse_dec.y != 0xffffff00;
-		// mouse_dec.y = -mouse_dec.y;
+		mouse_dec.y = -mouse_dec.y;
 
+		// int tmp[3] = { mouse_dec.btn, mouse_now_site_x, mouse_now_site_y };
 		int tmp[3] = { mouse_dec.btn,mouse_dec.x,mouse_dec.y };
+
 		for (int i = 0; i < 3; i++) {
 			int n = tmp[i];
 			su_sprintf(tmp_string, "%d", n);
@@ -169,6 +175,19 @@ void mousebuf_deal() {
 			boxfill8_s(x, 3 * FONT_Y_SIZE, 5 * FONT_X_SIZE, FONT_Y_SIZE, COL8_000000);
 			putfonts8_asc(x, 3 * FONT_Y_SIZE, COL8_FFFFFF, tmp_string);
 		}
+		putblock(mouse_now_site_x, mouse_now_site_y, 16, 16, mouse_screen_origin);
+
+		// if (mouse_dec.x >= 0 && mouse_dec.x <= DISPLAY_X_SIZE - 16)
+		mouse_now_site_x += mouse_dec.x;
+		if (mouse_now_site_x < 0) mouse_now_site_x = 0;
+		if (mouse_now_site_x > DISPLAY_X_SIZE - 16) mouse_now_site_x = DISPLAY_X_SIZE - 16;
+		// if (mouse_dec.y >= 0 && mouse_dec.y <= DISPLAY_Y_SIZE - 16)
+		mouse_now_site_y += mouse_dec.y;
+		if (mouse_now_site_y < 0) mouse_now_site_y = 0;
+		if (mouse_now_site_y > DISPLAY_Y_SIZE - 16) mouse_now_site_y = DISPLAY_Y_SIZE - 16;
+
+		getblock(mouse_now_site_x, mouse_now_site_y, 16, 16, mouse_screen_origin);
+		putblock(mouse_now_site_x, mouse_now_site_y, 16, 16, mouse_cursor);
 	}
 
 	io_sti();
@@ -212,11 +231,10 @@ void enable_mouse(void) {
 	return; /* 顺利的话，键盘控制器会返回ACK(0xfa) */
 }
 
-
-void deal_mouse_cursor8(char* mouse, char bg) {
+void init_mouse_cursor8(char* mouse) {
 	char outline = COL8_000000;
 	char inside = COL8_FFFFFF;
-	const static char cursor[16][16] = {
+	const static char mouse_cursor_img[16][16] = {
 		"**************..",
 		"*OOOOOOOOOOO*...",
 		"*OOOOOOOOOO*....",
@@ -237,7 +255,7 @@ void deal_mouse_cursor8(char* mouse, char bg) {
 	char m;
 	for (int x = 0; x < 16; x++) {
 		for (int y = 0; y < 16; y++) {
-			char c = cursor[x][y];
+			char c = mouse_cursor_img[x][y];
 			switch (c) {
 			case 'O':
 				m = inside;
@@ -246,10 +264,15 @@ void deal_mouse_cursor8(char* mouse, char bg) {
 				m = outline;
 				break;
 			case '.':
-				m = bg;
+				m = -1;
 				break;
 			}
 			mouse[y * 16 + x] = m;
 		}
 	}
+
+
+	mouse_now_site_x = 100;
+	mouse_now_site_y = 100;
+	putblock(mouse_now_site_x, mouse_now_site_y, 16, 16, mouse);
 }

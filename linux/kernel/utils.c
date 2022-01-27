@@ -5,6 +5,7 @@ int int2basestr(int n, char* s, int base);
 
 #define charIsNum(c) (c >= '0' && c <= '9')
 #define char2Num(c) (c - '0')
+// #define between(n,a,b) n>a
 
 char temp_str[20];
 int su_sprintf(char* __stream, char* __format, ...) {
