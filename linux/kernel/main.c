@@ -72,8 +72,12 @@ void bootmain(void) {
 		// for(int i=0;i<1000000;i++);
 		// io_sti();
 
-
-		putfonts8_asc(15, 30, a, "can click");
+		/*
+			注意如果loop循环中包含过度频繁的操作处理逻辑
+			会对中断处理产生延迟影响
+			鼠标会乱跳, 不灵了
+		*/
+		// putfonts8_asc(15, 30, a, "can click");
 		// for(int i=0;i<1000000;i++);
 		keybuf_deal();
 		mousebuf_deal();
@@ -123,6 +127,7 @@ int mouse_now_site_x;
 int mouse_now_site_y;
 char mouse_screen_origin[16 * 16];
 
+
 void mousebuf_deal() {
 	io_cli();
 	// for(int i=0;i<100000;i++);
@@ -136,19 +141,17 @@ void mousebuf_deal() {
 				mouse_dec.group_flag = 0;
 			}
 		}
-		else {
-			if ((mouse_dec.group_flag == 0 &&
-				((data & 0xc8) == 0x08)) ||
-				mouse_dec.group_flag > 0) {
+		if ((mouse_dec.group_flag == 0)) {
+			if ((data & 0xc8) == 0x08) {
 				mouse_dec.group[mouse_dec.group_flag++] = data;
 			}
-			else {
-				// // int size = queue_size(buf_ptr);
-				// su_sprintf(tmp_string, "size: %d %x", mouse_dec.group_flag, data& 0xc8);
-				// boxfill8_s(0, FONT_Y_SIZE * 6, 10 * FONT_X_SIZE, FONT_Y_SIZE, COL8_000000);
-				// putfonts8_asc(0, FONT_Y_SIZE * 6, COL8_FFFFFF, tmp_string);
-
-			}
+		}
+		else {
+			mouse_dec.group[mouse_dec.group_flag++] = data;
+			// // int size = queue_size(buf_ptr);
+			// su_sprintf(tmp_string, "size: %d %x", mouse_dec.group_flag, data& 0xc8);
+			// boxfill8_s(0, FONT_Y_SIZE * 6, 10 * FONT_X_SIZE, FONT_Y_SIZE, COL8_000000);
+			// putfonts8_asc(0, FONT_Y_SIZE * 6, COL8_FFFFFF, tmp_string);
 		}
 	}
 
@@ -156,13 +159,27 @@ void mousebuf_deal() {
 		mouse_dec.group_flag = 0;
 		// show
 		unsigned char m0 = mouse_dec.group[0];
+		// 高4位中低2位与x,y的移动方向有关，
+		// 当bit4为1时，表示鼠标向－x方向移动，当bit5为1时表示鼠标向-y方向移动
+
+
 		mouse_dec.btn = m0 & 0x07; // 0b0111
-		mouse_dec.x = (char)mouse_dec.group[1];
-		mouse_dec.y = (char)mouse_dec.group[2];
-		if (m0 & 0x10) // 0b0001 0000
-			mouse_dec.x != 0xffffff00;
-		if (m0 & 0x20) // 0b0010 0000
-			mouse_dec.y != 0xffffff00;
+		mouse_dec.x = mouse_dec.group[1];
+		mouse_dec.y = mouse_dec.group[2];
+		if ((m0 & 0x10) != 0) // 0b0001 0000
+			mouse_dec.x |= 0xffffff00;
+		// mouse_dec.x =0;
+		if ((m0 & 0x20) != 0) // 0b0010 0000
+			mouse_dec.y |= 0xffffff00;
+		// mouse_dec.y =0;
+// #define abs(a) (a<0?-a:a)
+		// if(abs(mouse_dec.x)>22)mouse_dec.x=0;
+		// if(abs(mouse_dec.y)>22)mouse_dec.y=0;
+		// if(mouse_dec.x<0)mouse_dec.x=-1;
+
+		// mouse_dec.x = mouse_dec.x > 0 ? 1 :(mouse_dec.x<0? -1:0);
+		// mouse_dec.y = mouse_dec.y > 0 ? 1 :(mouse_dec.y<0? -1:0);
+		// mouse_dec.y = mouse_dec.y > 0 ? 1 : -1;
 		mouse_dec.y = -mouse_dec.y;
 
 		// int tmp[3] = { mouse_dec.btn, mouse_now_site_x, mouse_now_site_y };
