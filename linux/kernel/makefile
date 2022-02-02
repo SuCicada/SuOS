@@ -3,34 +3,37 @@ addr=0xc400
 OUTPUT=output
 OBJDIR=.
 
-CFLAGS := $(CFLAGS) -O0  -I. -static-libgcc 
+CFLAGS := $(CFLAGS) -O0 -static-libgcc
+
+CFLAGS += -I. $(patsubst %, -I%, $(shell find . -type d -not -path ./output ))
 # CFLAGS += -nostdinc
-# 不使用C语言的内建函数 
+# 不使用C语言的内建函数
 # CFLAGS += -fno-builtin
-#  -MD                                                                                        
+#  -MD
 # CFLAGS += -fno-omit-frame-pointer
 # 编译后显示所有警告
-CFLAGS += -Wall -Wno-format -Wno-unused -Werror 
+CFLAGS += -Wall -Wno-format -Wno-unused -Werror
 # debug info
 CFLAGS += -gstabs
 CFLAGS += -m32 -march=i486
 CFLAGS += -std=c99  -fno-stack-protector -g
 
 
-LDFLAGS = -m elf_i386  -nostdlib #-nostdinc
+LDFLAGS = -m elf_i386  -nostdlib -nostdinc
 
 
-SOURCE_FILES = $(wildcard *)
+SOURCE_FILES := $(filter-out $(wildcard output/*),  $(wildcard * */* ))
+
 # 注意，顺序很重要，entry 要在第一个
 ENTRY_OBJ = entry.o
 CODE_OBJ = main.o asmfunc.o asmfunc0.o utils.o \
 	dsctbl.o int.o color.o \
 	queue.o
-ENTRY_OBJ_FILES =  $(patsubst %, $(OUTPUT)/%, $(ENTRY_OBJ))
-CODE_OBJ_FILES += $(patsubst %, $(OUTPUT)/%, $(CODE_OBJ))
+ENTRY_OBJ_FILES :=  $(patsubst %, $(OUTPUT)/%, $(ENTRY_OBJ))
+CODE_OBJ_FILES  := $(patsubst %, $(OUTPUT)/%, $(CODE_OBJ))
 OBJ_FILES = $(ENTRY_OBJ_FILES) + $(CODE_OBJ_FILES)
 
-.PHONY: clean $(OBJ_NAME) kernel success
+.PHONY: clean build kernel success
 
 kernel = $(OUTPUT)/kernel
 default:
@@ -47,17 +50,17 @@ success:
 	@echo "=========================="
 	@echo "|| build kernel success ||"
 	@echo "=========================="
-	
-sources: hankaku.h 
-	
-build: info $(OUTPUT) $(SOURCE_FILES) $(OBJ_NAME) $(kernel) success	
+
+sources: hankaku.h
+
+build: info $(OUTPUT) $(SOURCE_FILES) $(kernel) success
 
 
 # https://linux.die.net/man/1/ld
 # https://sites.ualberta.ca/dept/chemeng/AIX-43/share/man/info/C/a_doc_lib/cmds/aixcmds3/ld.htm
 # .ONESHELL:
-SECTIONS = -j .text -j .data -j .rodata 
-# SECTIONS = 
+SECTIONS = -j .text -j .data -j .rodata
+# SECTIONS =
 $(kernel) : $(OUTPUT)/entry $(OUTPUT)/code
 # -Ttext 代表, 所有代码起始地址为 0xc400 ,即 entry 开始的地址
 # ld $(LDFLAGS) -N -e start -Ttext $(addr) -o $@.out $^
@@ -75,7 +78,7 @@ $(OUTPUT)/code: $(CODE_OBJ_FILES)
 	objcopy $(SECTIONS) -O binary $@.out $@
 	objdump $(SECTIONS) -S $@.out > $@.asm
 	objconv -fnasm $@.out $@2.asm
-	
+
 # ========== source files
 $(OUTPUT)/asmfunc0.o: asmfunc.asm
 	nasm -g -f elf32 -o $@ $<
@@ -96,9 +99,12 @@ $(OUTPUT)/main.o: main.c color.c hankaku.h asmfunc.h
 	objconv -fnasm $@ $(patsubst %.o, %2.asm, $@)
 
 $(OUTPUT)/%.o: %.c
-	gcc $(CFLAGS) -c -o $@ $<
-	objdump -S $@ > $(patsubst %.o, %.asm, $@)
-	objconv -fnasm $@ $(patsubst %.o, %2.asm, $@)
+	$(gcc_cmd)
+
+$(OUTPUT)/%.o: %/*.c
+	$(gcc_cmd)
+# $(OUTPUT)/%.o:
+# 	echo % ???
 
 $(OUTPUT)/%.o: %.S
 	$(gcc_cmd)
@@ -107,19 +113,19 @@ convHankakuTxt = $(OUTPUT)/convHankakuTxt
 hankaku.h: hankaku.txt $(convHankakuTxt)
 	 $(convHankakuTxt) $< $@
 
-$(convHankakuTxt): convHankakuTxt.c 
+$(convHankakuTxt): convHankakuTxt.c
 	gcc -o  $@ $<
 
-$(OUTPUT): 
+$(OUTPUT):
 	mkdir -p $(OUTPUT)
 
-# ===== action 
+# ===== action
 
 # 明确声明clean是"伪目标"
 # make就不会去检查是否存在一个叫做clean的文件，而是每次运行都执行对应的命令。
 .PHONY: clean
-clean: 
-	rm -frv $(OUTPUT) 
+clean:
+	rm -frv $(OUTPUT)
 	@# @rm -fr entry.o main.o screen.o kernel.out kernel.asm kernel *.d
 
 
@@ -128,7 +134,7 @@ clean:
 
 # 	@# objdump -S output/$@ > $(OUTPUT)/$@.asm ;
 # 	@# ../../bin/objconv.exe -fnasm output/$@
-	 
+
 # # temp for debug
 # color.S: color.c
 # 	gcc $(CFLAGS) -c -S -o output/$@ $<

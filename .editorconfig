@@ -57,3 +57,14 @@ cpp_space_around_assignment_operator=insert
 cpp_space_pointer_reference_alignment=left
 cpp_space_around_ternary_operator=insert
 cpp_wrap_preserve_blocks=one_liners
+
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+
+[*.{c,h,cpp,S,s,nas,asm}]
+indent_size = 4
+indent_style = space
+
+[{Makefile, makefile}]
+indent_style = tab

@@ -35,8 +35,8 @@ int main(int argc, char* argv[]) {
             fprintf(outFile, "{ ");
             for (int i = 0;i < 16;i++) {
                 fgets(line, len, inFile);
-                int dot = fontStr2Int(line); 
-                if (i == 8) { 
+                int dot = fontStr2Int(line);
+                if (i == 8) {
                     fprintf(outFile, "\n\t");
                 }
                 fprintf(outFile, "0x%02x, ", dot);

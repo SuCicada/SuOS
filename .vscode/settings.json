@@ -13,7 +13,8 @@
     "hankaku.h": "c",
     "color.h": "c",
     "unistd.h": "c",
-    "types.h": "c"
+    "types.h": "c",
+    "queue.h": "c"
   },
   "C_Cpp_Runner.warnings": [
     "-Wall",

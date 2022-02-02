@@ -27,8 +27,8 @@ struct SEGMENT_DESCRIPTOR {     // 8 byte
 };
 struct GATE_DESCRIPTOR {         // 8 byte
 	short offset_low, selector;  // 2 + 2
-	char dw_count, access_right; // 1 +2 
-	short offset_high;           // 2 
+	char dw_count, access_right; // 1 +2
+	short offset_high;           // 2
 };
 
 
