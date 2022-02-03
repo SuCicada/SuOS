@@ -5,7 +5,7 @@ OBJDIR=.
 
 CFLAGS := $(CFLAGS) -O0 -static-libgcc
 
-CFLAGS += -I. $(patsubst %, -I%, $(shell find . -type d -not -path ./output ))
+CFLAGS += -I. $(patsubst %, -I%, $(shell find src -type d -not -path ./output ))
 # CFLAGS += -nostdinc
 # 不使用C语言的内建函数
 # CFLAGS += -fno-builtin
@@ -22,7 +22,7 @@ CFLAGS += -std=c99  -fno-stack-protector -g
 LDFLAGS = -m elf_i386  -nostdlib -nostdinc
 
 
-SOURCE_FILES := $(filter-out $(wildcard output/*),  $(wildcard * */* ))
+SOURCE_FILES := $(filter-out $(wildcard output/*),  $(wildcard * src/* src/*/* ))
 
 # 注意，顺序很重要，entry 要在第一个
 ENTRY_OBJ = entry.o
@@ -31,8 +31,8 @@ CODE_OBJ = main.o asmfunc.o asmfunc0.o utils.o \
 	queue.o
 ENTRY_OBJ_FILES :=  $(patsubst %, $(OUTPUT)/%, $(ENTRY_OBJ))
 CODE_OBJ_FILES  := $(patsubst %, $(OUTPUT)/%, $(CODE_OBJ))
-OBJ_FILES = $(ENTRY_OBJ_FILES) + $(CODE_OBJ_FILES)
-
+OBJ_FILES = $(ENTRY_OBJ_FILES) $(CODE_OBJ_FILES)
+src_dir = src
 .PHONY: clean build kernel success
 
 kernel = $(OUTPUT)/kernel
@@ -44,6 +44,7 @@ info:
 	@echo SOURCE_FILES: $(SOURCE_FILES)
 	@echo OBJ_FILES: 	$(OBJ_FILES)
 	@echo CFLAGS:    	$(CFLAGS)
+	@echo src_dir:		$(src_dir)
 	@echo ""
 
 success:
@@ -53,7 +54,10 @@ success:
 
 sources: hankaku.h
 
-build: info $(OUTPUT) $(SOURCE_FILES) $(kernel) success
+build: info \
+		$(OUTPUT) $(SOURCE_FILES) \
+		header $(kernel) \
+		success
 
 
 # https://linux.die.net/man/1/ld
@@ -61,11 +65,10 @@ build: info $(OUTPUT) $(SOURCE_FILES) $(kernel) success
 # .ONESHELL:
 SECTIONS = -j .text -j .data -j .rodata
 # SECTIONS =
-$(kernel) : $(OUTPUT)/entry $(OUTPUT)/code
+$(kernel):  $(OUTPUT)/entry $(OUTPUT)/code
 # -Ttext 代表, 所有代码起始地址为 0xc400 ,即 entry 开始的地址
 # ld $(LDFLAGS) -N -e start -Ttext $(addr) -o $@.out $^
 	cat $^ > $@
-
 
 $(OUTPUT)/entry: $(ENTRY_OBJ_FILES)
 	ld $(LDFLAGS) -N -e entry -Ttext $(addr) -o $@.out $^
@@ -79,8 +82,11 @@ $(OUTPUT)/code: $(CODE_OBJ_FILES)
 	objdump $(SECTIONS) -S $@.out > $@.asm
 	objconv -fnasm $@.out $@2.asm
 
+hankaku_dir = $(src_dir)/hankaku/
+header: $(hankaku_dir)/hankaku.h
+
 # ========== source files
-$(OUTPUT)/asmfunc0.o: asmfunc.asm
+$(OUTPUT)/asmfunc0.o: src/asmfunc/asmfunc.asm
 	nasm -g -f elf32 -o $@ $<
 
 gcc_cmd=\
@@ -93,27 +99,30 @@ $(OUTPUT)/entry.o: entry.S mmu.h
 	objdump -S $@ > $(patsubst %.o, %.asm, $@)
 	objconv -fnasm $@ $(patsubst %.o, %2.asm, $@)
 
-$(OUTPUT)/main.o: main.c color.c hankaku.h asmfunc.h
-	gcc $(CFLAGS) -c -o $@ $<
-	objdump -S $@ > $(patsubst %.o, %.asm, $@)
-	objconv -fnasm $@ $(patsubst %.o, %2.asm, $@)
+# $(OUTPUT)/main.o: main.c color.c hankaku.h asmfunc.h
+# 	gcc $(CFLAGS) -c -o $@ $<
+# 	objdump -S $@ > $(patsubst %.o, %.asm, $@)
+# 	objconv -fnasm $@ $(patsubst %.o, %2.asm, $@)
 
 $(OUTPUT)/%.o: %.c
 	$(gcc_cmd)
 
-$(OUTPUT)/%.o: %/*.c
-	$(gcc_cmd)
-# $(OUTPUT)/%.o:
-# 	echo % ???
 
 $(OUTPUT)/%.o: %.S
 	$(gcc_cmd)
 
+$(OUTPUT)/%.o: $(src_dir)/%/*.c
+	$(gcc_cmd)
+
+$(OUTPUT)/%.o: $(src_dir)/%/*.S
+	$(gcc_cmd)
+
+# ==== hankaku ======
 convHankakuTxt = $(OUTPUT)/convHankakuTxt
-hankaku.h: hankaku.txt $(convHankakuTxt)
+$(hankaku_dir)/hankaku.h: $(hankaku_dir)/hankaku.txt $(convHankakuTxt)
 	 $(convHankakuTxt) $< $@
 
-$(convHankakuTxt): convHankakuTxt.c
+$(convHankakuTxt): $(hankaku_dir)/convHankakuTxt.c
 	gcc -o  $@ $<
 
 $(OUTPUT):
