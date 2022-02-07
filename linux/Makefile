@@ -1,9 +1,9 @@
 OUTPUT = output
 BIN = bin
 IMG = $(OUTPUT)/suos.img
-OUT_BIN = $(OUTPUT)/suos.bin
+OS_BIN = $(OUTPUT)/suos.bin
 OUT_LST = $(OUTPUT)/suos.lst
-OUT_FLOPPY = $(OUTPUT)/floppy.bin 
+OUT_FLOPPY = $(OUTPUT)/floppy.bin
 KERNEL = kernel/$(OUTPUT)/kernel
 
 # QEMU = qemu-system-x86_64
@@ -11,28 +11,22 @@ QEMU = qemu-system-i386
 EDIMG = $(BIN)/edimg.sh
 TMP_DIR = /tmp/floppy
 MOUNT = sudo mount
-UMOUNT = sudo umount 
+UMOUNT = sudo umount
 UID = $(shell id -u)
 GID = $(shell id -g)
 
 .PHONY: list clean kernel
 
-build: kernel $(IMG) 
+build: kernel $(OS_BIN) $(IMG) copy
 	@echo "=========================="
 	@echo "|| build su_img success ||"
 	@echo "=========================="
-kernel:
-	# nasm -o bootloader suos.nas
-	make -C kernel  build 
-# addr=0xc400 
-
-# $(KERNEL):
-# 	cd ./kernel
-# 	make clean
-# 	make run addr=0xc400 
 
 run: build
 	$(QEMU) -drive file=$(IMG),if=floppy
+
+kernel:
+	make -C kernel build
 
 debug: build
 #	$(QEMU) -drive file=$(IMG),if=floppy -gdb tcp:0.0.0.0:1234 -S
@@ -48,24 +42,23 @@ copy: $(IMG) $(KERNEL)
 mount: $(IMG)
 	$(MOUNT) -o loop,fat=12,uid=$(UID),gid=$(GID) $(IMG) $(TMP_DIR)
 
-umount:	
-	$(UMOUNT) $(TMP_DIR) 
+umount:
+	$(UMOUNT) $(TMP_DIR)
 
-$(OUT_BIN) : suos.nas Makefile output
-	nasm -g -o $@ -l $(OUT_LST) $<   
+$(OS_BIN) : suos.nas Makefile output
+	nasm -g -o $@ -l $(OUT_LST) $<
 # nasm -o $(OUT_FLOPPY) -l $(OUTPUT)/floppy.lst floppy.nas
 
-$(IMG): $(OUT_BIN)  $(KERNEL)
+$(IMG): $(OS_BIN) $(KERNEL)
 # 制作一个 1.44MB 的文件用于作为软盘文件
 	$(EDIMG) $< $@
-	make copy
 
-$(OUTPUT): 
+$(OUTPUT):
 	mkdir -p $(OUTPUT)
 
 list:
 	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$'
 
 clean:
-	rm -fr $(OUTPUT) 
+	rm -fr $(OUTPUT)
 	cd ./kernel;make clean

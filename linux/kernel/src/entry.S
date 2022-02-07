@@ -27,16 +27,16 @@ try:
   .asciz "\r\n\n\rtry it again"
 
 puts:
-	movb (%si),%al
-	add $1,%si
-	cmp $0,%al
-	je over
-	movb $0x0e,%ah
-	movw $15,%bx
-	int $0x10
-	jmp puts
+    movb (%si),%al
+    add $1,%si
+    cmp $0,%al
+    je over
+    movb $0x0e,%ah
+    movw $15,%bx
+    int $0x10
+    jmp puts
 over:
-	ret
+    ret
 
 start:
 
@@ -46,7 +46,8 @@ start:
   movw    %ax,%es             # -> Extra Segment
   movw    %ax,%ss             # -> Stack Segment
 
-  movb $0x13,%al  # ;vga 320x200x8 位,color mode
+# 画面设置
+  movb $0x13,%al            # ; vga 320x200x8 位,color mode
   movb $0x00,%ah
   int $0x10
 
@@ -56,10 +57,11 @@ start:
   movw $200,(SCRNY)
   movl $0x000a0000,(VRAM)
 
-  # get keyboard led status
+# get keyboard led status
+# 通过 BIOS 获取指示灯状态
   movb	$0x02,%ah
-  int     $0x16			# keyboard interrupts
-  movb   %al,(LEDS)
+  int   $0x16			# keyboard interrupts
+  movb  %al,(LEDS)
 
 # diplay something
   movw $msg,%si
@@ -68,55 +70,72 @@ start:
   movw $try,%si
   call puts
 
-# 这一部分在做什么也不知道，先翻译成at&t格式再说：
+#	PIC关闭一切中断
+#	根据AT兼容机的规格，如果要初始化PIC，
+#	必须在CLI之前进行，否则有时会挂起。
+#	随后进行PIC的初始化。
   movb $0xff,%al
   outb %al, $0x21 # format  outb data port
-  nop
+  nop             # 如果连续执行OUT指令，有些机种会无法正常运
   out %al, $0xa1
   # jmp .
-   cli                         # Disable interrupts
+   cli                         # 禁止CPU级别的中断, Disable interrupts
   #  cld                         # String operations increment
 
-  # Enable A20:
-  #   For backwards compatibility with the earliest PCs, physical
-  #   address line 20 is tied low, so that addresses higher than
-  #   1MB wrap around to zero by default.  This code undoes this.
+# Enable A20:
+#   For backwards compatibility with the earliest PCs, physical
+#   address line 20 is tied low, so that addresses higher than
+#   1MB wrap around to zero by default.  This code undoes this.
+#	为了让CPU能够访问1MB以上的内存空间，设定A20GATE
 seta20.1:
-  inb     $0x64,%al               # Wait for not busy
-  testb   $0x2,%al
-  jnz     seta20.1
-
+#   inb     $0x64,%al               # Wait for not busy
+#   testb   $0x2,%al
+#   jnz     seta20.1
+  call waitkbdout
   movb    $0xd1,%al               # 0xd1 -> port 0x64
   outb    %al,$0x64
 
 seta20.2:
-  inb     $0x64,%al               # Wait for not busy
-  testb   $02,%al
-  jnz     seta20.2
-
+#   inb     $0x64,%al               # Wait for not busy
+#   testb   $02,%al
+#   jnz     seta20.2
+  call waitkbdout
   movb    $0xdf,%al               # 0xdf -> port 0x60
   outb    %al,$0x60
 
+  call	waitkbdout
+  jmp   set_lgdt
+
+waitkbdout:
+  inb     $0x64, %al               # Wait for not busy
+  testb   $02,   %al
+  inb 		$0x60, %al              # 空读（为了清空数据接收缓冲区中的垃圾数据）
+  jnz     waitkbdout
+
+set_lgdt:
   # Switch from real to protected mode, using a bootstrap GDT       this is vip ,but i don`t know it clearly now
   # and segment translation that makes virtual addresses
   # identical to their physical addresses, so that the
   # effective memory map does not change during the switch.
   lgdt    gdtdesc
   movl    %cr0, %eax
-  orl     $CR0_PE_ON, %eax  # CR0_PE_ON=0x1
+  andl		$0x7fffffff, %eax	# 设bit31为0（禁用分页）
+  orl     $CR0_PE_ON, %eax  # bit0到1转换（保护模式过渡）, CR0_PE_ON=0x1
   movl    %eax, %cr0
 
-  #这个地方非常的重要，一但这条movl %eax,%cr0把cr0的pe位打开后，下面的
-  #代码就是32位的，所以空上ljmp的指令是条过度指令，选择 用的gdt是1*8,
-  #也就是第一个gdt(从0开始的)。
+  # 这个地方非常的重要，一但这条movl %eax,%cr0把cr0的pe位打开后，下面的
+  # 代码就是32位的，所以空上ljmp的指令是条过度指令，选择 用的gdt是1*8,
+  # 也就是第一个gdt(从0开始的)。
   # Jump to next instruction, but in 32-bit code segment.
   # Switches processor into 32-bit mode.
+  # 跳转是为了让 cpu 跳过pipeline已经缓存的解释了的后面的指令,
+  #   而要重新解释一遍指令
   ljmp    $(2<<3), $protcseg
 
 
 
-#######################################################################
-#正式进入32位的保护模式。
+# ######################################################################
+# 正式进入32位的保护模式。
 .code32                     # Assemble for 32-bit mode
 protcseg:
   # Set up the protected-mode data segment registers

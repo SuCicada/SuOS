@@ -28,11 +28,13 @@ SOURCE_FILES := $(filter-out $(wildcard output/*),  $(wildcard * src/* src/*/* )
 ENTRY_OBJ = entry.o
 CODE_OBJ = main.o asmfunc.o asmfunc0.o utils.o \
 	dsctbl.o int.o color.o \
+	mouse.o keyboard.o \
 	queue.o
 ENTRY_OBJ_FILES :=  $(patsubst %, $(OUTPUT)/%, $(ENTRY_OBJ))
 CODE_OBJ_FILES  := $(patsubst %, $(OUTPUT)/%, $(CODE_OBJ))
 OBJ_FILES = $(ENTRY_OBJ_FILES) $(CODE_OBJ_FILES)
 src_dir = src
+
 .PHONY: clean build kernel success
 
 kernel = $(OUTPUT)/kernel
@@ -94,10 +96,10 @@ gcc_cmd=\
 	objdump -S $@ > $(patsubst %.o, %.asm, $@) ;\
 	objconv -fnasm $@ $(patsubst %.o, %2.asm, $@) ;\
 
-$(OUTPUT)/entry.o: entry.S mmu.h
-	gcc $(CFLAGS) -c -o $@ $<
-	objdump -S $@ > $(patsubst %.o, %.asm, $@)
-	objconv -fnasm $@ $(patsubst %.o, %2.asm, $@)
+# $(OUTPUT)/entry.o: entry.S mmu.h
+# 	gcc $(CFLAGS) -c -o $@ $<
+# 	objdump -S $@ > $(patsubst %.o, %.asm, $@)
+# 	objconv -fnasm $@ $(patsubst %.o, %2.asm, $@)
 
 # $(OUTPUT)/main.o: main.c color.c hankaku.h asmfunc.h
 # 	gcc $(CFLAGS) -c -o $@ $<
@@ -106,9 +108,12 @@ $(OUTPUT)/entry.o: entry.S mmu.h
 
 $(OUTPUT)/%.o: %.c
 	$(gcc_cmd)
-
-
 $(OUTPUT)/%.o: %.S
+	$(gcc_cmd)
+
+$(OUTPUT)/%.o: $(src_dir)/%.c
+	$(gcc_cmd)
+$(OUTPUT)/%.o: $(src_dir)/%.S
 	$(gcc_cmd)
 
 $(OUTPUT)/%.o: $(src_dir)/%/*.c

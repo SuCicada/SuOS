@@ -1,7 +1,8 @@
 #include "asmfunc.h"
 #include "queue.h"
-
-int su_sprintf(char* __stream, char* __format, ...);
+#include "color.h"
+#include "queue.h"
+#include "utils.h"
 
 struct BootInfo {
 	char cyls, leds, vmode, reserve; // 1 byte * 4 ;
@@ -64,3 +65,12 @@ struct KEYBUF {
 	int size;
 };
 #define KEYBUF struct KEYBUF
+
+
+// keyboard and mouse
+#define PORT_KEYSTA				0x0064
+#define PORT_KEYCMD				0x0064
+#define PORT_KEYDAT				0x0060
+#define KEYSTA_SEND_NOTREADY	0x02
+#define KEYCMD_WRITE_MODE		0x60
+#define KBC_MODE				0x47 	// 鼠标

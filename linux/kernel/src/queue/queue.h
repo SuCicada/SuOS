@@ -1,9 +1,11 @@
-
+#ifndef Queue
 struct Queue {
     unsigned char* node_arr;
     int start, end, capcity, size;
 };
-#define Queue struct Queue  
+#define Queue struct Queue
+#endif // Queue
+
 Queue* queue_init(Queue* queue, unsigned char* buf, int size);
 int queue_size(Queue* queue);
 int queue_empty(Queue* queue);

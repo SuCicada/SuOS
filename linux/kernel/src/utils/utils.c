@@ -1,12 +1,8 @@
-#include "header.h"
-int int2str(int n, char* s);
-int int2hexstr(int n, char* s);
-int int2basestr(int n, char* s, int base);
+#include "utils.h"
 
-#define charIsNum(c) (c >= '0' && c <= '9')
-#define char2Num(c) (c - '0')
 // #define between(n,a,b) n>a
 
+// ===== su_sprintf ===========
 char temp_str[20];
 int su_sprintf(char* __stream, char* __format, ...) {
     char c;
@@ -121,3 +117,4 @@ int int2basestr(int n, char* s, int base) {
     // s[flag] = '\0';
     return flag;
 }
+
