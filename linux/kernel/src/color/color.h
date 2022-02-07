@@ -29,6 +29,7 @@ void putfonts8_asc(int x, int y, char color, char*);
 void putblock(int x, int y, int xsize, int ysize, char* vblock);
 void getblock(int x, int y, int xsize, int ysize, char* vblock);
 void init_screen();
+void init_palette();
 
 extern int DISPLAY_X_SIZE;
 extern int DISPLAY_Y_SIZE;

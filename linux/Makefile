@@ -15,8 +15,10 @@ UMOUNT = sudo umount
 UID = $(shell id -u)
 GID = $(shell id -g)
 
-.PHONY: list clean kernel
+debug_build = false
 
+.PHONY: list clean kernel
+all: build
 build: kernel $(OS_BIN) $(IMG) copy
 	@echo "=========================="
 	@echo "|| build su_img success ||"
@@ -26,9 +28,10 @@ run: build
 	$(QEMU) -drive file=$(IMG),if=floppy
 
 kernel:
-	make -C kernel build
+	make -C kernel build debug_build=$(debug_build)
 
-debug: build
+debug:
+	make build debug_build=true
 #	$(QEMU) -drive file=$(IMG),if=floppy -gdb tcp:0.0.0.0:1234 -S
 	$(QEMU) -fda $(IMG) -s -S
 
@@ -45,7 +48,7 @@ mount: $(IMG)
 umount:
 	$(UMOUNT) $(TMP_DIR)
 
-$(OS_BIN) : suos.nas Makefile output
+$(OS_BIN) : suos.asm Makefile output
 	nasm -g -o $@ -l $(OUT_LST) $<
 # nasm -o $(OUT_FLOPPY) -l $(OUTPUT)/floppy.lst floppy.nas
 

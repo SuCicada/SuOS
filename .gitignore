@@ -4,4 +4,7 @@
 *.bin
 *.img
 .vscode/**.log
-
+/build
+/cmake-build-*
+/cmake-build-debug/
+/cmake-build-default/

@@ -1,4 +1,5 @@
-addr=0xc400
+addr = 0xc400
+debug_build = false
 
 OUTPUT=output
 OBJDIR=.
@@ -30,6 +31,7 @@ CODE_OBJ = main.o asmfunc.o asmfunc0.o utils.o \
 	dsctbl.o int.o color.o \
 	mouse.o keyboard.o \
 	queue.o
+
 ENTRY_OBJ_FILES :=  $(patsubst %, $(OUTPUT)/%, $(ENTRY_OBJ))
 CODE_OBJ_FILES  := $(patsubst %, $(OUTPUT)/%, $(CODE_OBJ))
 OBJ_FILES = $(ENTRY_OBJ_FILES) $(CODE_OBJ_FILES)
@@ -38,8 +40,8 @@ src_dir = src
 .PHONY: clean build kernel success
 
 kernel = $(OUTPUT)/kernel
-default:
-	make build
+
+all: build
 
 info:
 	@echo OUTPUT: 		$(OUTPUT)
@@ -47,6 +49,7 @@ info:
 	@echo OBJ_FILES: 	$(OBJ_FILES)
 	@echo CFLAGS:    	$(CFLAGS)
 	@echo src_dir:		$(src_dir)
+	@echo debug_build:	$(debug_build)
 	@echo ""
 
 success:
@@ -72,17 +75,25 @@ $(kernel):  $(OUTPUT)/entry $(OUTPUT)/code
 # ld $(LDFLAGS) -N -e start -Ttext $(addr) -o $@.out $^
 	cat $^ > $@
 
+
+kernel_obj_cmd = \
+		objcopy $(SECTIONS) -O binary $@.out $@ ;\
+
+ifeq ($(debug_build), true)
+kernel_cmd += \
+		objdump $(SECTIONS) -S $@.out > $@.asm ;\
+		objconv -fnasm $@.out $@2.asm ;\
+
+endif
+
 $(OUTPUT)/entry: $(ENTRY_OBJ_FILES)
 	ld $(LDFLAGS) -N -e entry -Ttext $(addr) -o $@.out $^
-	objcopy $(SECTIONS) -O binary $@.out $@
-	objdump $(SECTIONS) -S $@.out > $@.asm
-	objconv -fnasm $@.out $@2.asm
+	$(kernel_obj_cmd)
 
 $(OUTPUT)/code: $(CODE_OBJ_FILES)
 	ld $(LDFLAGS) -N -e bootmain -Ttext 0x00280000 -o $@.out $^
-	objcopy $(SECTIONS) -O binary $@.out $@
-	objdump $(SECTIONS) -S $@.out > $@.asm
-	objconv -fnasm $@.out $@2.asm
+	$(kernel_obj_cmd)
+
 
 hankaku_dir = $(src_dir)/hankaku/
 header: $(hankaku_dir)/hankaku.h
@@ -91,10 +102,15 @@ header: $(hankaku_dir)/hankaku.h
 $(OUTPUT)/asmfunc0.o: src/asmfunc/asmfunc.asm
 	nasm -g -f elf32 -o $@ $<
 
-gcc_cmd=\
+gcc_cmd = \
 	gcc $(CFLAGS) -c -o $@ $< ;\
+
+ifeq ($(debug_build), true)
+gcc_cmd += \
 	objdump -S $@ > $(patsubst %.o, %.asm, $@) ;\
 	objconv -fnasm $@ $(patsubst %.o, %2.asm, $@) ;\
+
+endif
 
 # $(OUTPUT)/entry.o: entry.S mmu.h
 # 	gcc $(CFLAGS) -c -o $@ $<

@@ -64,7 +64,7 @@ void init_palette() {
 void set_palette(int start, int end, unsigned char* rgb_table) {
     // int start = 0,
     //     end = 15;
-    int flag = io_read_eflags();
+    int flag = io_load_eflags();
     io_cli();
     unsigned char* rgb_table_pnt = rgb_table;
     io_out8(0x03c8, start);

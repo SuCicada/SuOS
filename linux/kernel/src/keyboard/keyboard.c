@@ -1,10 +1,10 @@
 #include "header.h"
 #include "keyboard.h"
 
+
 KEYBUF keybuf;
 unsigned char keybuf_mem[32]; // 为了能初始化固定的内存空间
 char tmp_string[128];
-
 
 void wait_KBC_sendready(void) {
     /* 等待键盘控制电路准备完毕 */
@@ -44,7 +44,6 @@ void keybuf_deal() {
         su_sprintf(tmp_string, "size: %d", size);
         boxfill8(0, FONT_Y_SIZE * 5, 10 * FONT_X_SIZE, FONT_Y_SIZE * (5 + 1), COL8_000000);
         putfonts8_asc(0, FONT_Y_SIZE * 5, COL8_FFFFFF, tmp_string);
-
     }
     io_sti();
 }

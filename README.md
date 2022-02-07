@@ -20,3 +20,7 @@ https://blog.csdn.net/baidu_39511645/article/details/78368112
 https://github.com/llvm/llvm-project/releases/download/llvmorg-11.0.0/LLVM-11.0.0-win64.exe
 
 https://blog.csdn.net/ice__snow/article/details/50654629
+
+todo
+[ ] 检测环境中 objconv, 自动安装
+[ ] 设置选项 开启是否要 编译之后反编译转 asm

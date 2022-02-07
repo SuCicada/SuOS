@@ -7,8 +7,8 @@ section .text
 	GLOBAL	io_hlt			; このプログラムに含まれる関数名
 	GLOBAL	write_mem8
 	GLOBAL	io_cli, io_sti
-	GLOBAL	io_read_eflags, io_store_eflags
-	GLOBAL	io_out8, io_in8	
+	GLOBAL	io_load_eflags, io_store_eflags
+	GLOBAL	io_out8, io_in8
 	GLOBAL	load_gdtr, load_idtr
 	GLOBAL 	asm_inthandler21, asm_inthandler2c, asm_inthandler27
 	EXTERN  inthandler21, inthandler2c, inthandler27
@@ -19,13 +19,13 @@ section .text
 io_hlt:	; void io_hlt(void);
 	HLT
 	RET
-io_cli: 
+io_cli:
 	CLI
 	RET
 io_sti:
 	STI
 	RET
-io_read_eflags:
+io_load_eflags:
 	PUSHFD		; PUSH EFLAGS  32 bit
 	POP 	EAX		; 32 bit
 	RET
@@ -34,7 +34,7 @@ io_store_eflags:
 	PUSH	EAX
 	POPFD
 	RET
-	
+
 write_mem8:
 	MOV		ECX, [ESP+4]
 	MOV		AL,	 [ESP+8]
@@ -58,14 +58,14 @@ io_in8:
 ; void load_gdtr(int limit, int addr);
 ; ESP+6 -- ESP+7   2byte  段上限
 ; ESP+8 -- ESP+11  4byte  地址
-load_gdtr: 
+load_gdtr:
 	MOV		AX, [ESP+4]
-	MOV 	[ESP+6], AX  
+	MOV 	[ESP+6], AX
 	LGDT 	[ESP+6]		; give to GDTR register
 	RET
 
 ; void load_idtr(int limit, int addr)
-load_idtr:		
+load_idtr:
 	mov		ax, [esp + 4]		; limit
 	mov 	[esp + 6], ax
 	lidt	[esp + 6]
