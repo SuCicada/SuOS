@@ -1,3 +1,11 @@
+todo
+[ ] 检测环境中 objconv, 自动安装
+[ ] 设置选项 开启是否要 编译之后反编译转 asm
+[ ] 规范头文件, 补充 ifndef
+- 内存管理:
+  - malloc 实现
+  - 边界标记法 ptmalloc
+
 https://github.com/pollenjp/myHariboteOS
 
 https://github.com/cherishsir/ubuntu230os
@@ -21,6 +29,6 @@ https://github.com/llvm/llvm-project/releases/download/llvmorg-11.0.0/LLVM-11.0.
 
 https://blog.csdn.net/ice__snow/article/details/50654629
 
-todo
-[ ] 检测环境中 objconv, 自动安装
-[ ] 设置选项 开启是否要 编译之后反编译转 asm
+[内存分配---FF、BF、WF三种算法](https://www.cnblogs.com/XNQC1314/p/9065236.html)
+[伙伴算法](https://blog.csdn.net/wenqian1991/article/details/27968779)
+[高效管理MCU内存的6种分配算法对比](https://blog.csdn.net/DFWee/article/details/121243864)

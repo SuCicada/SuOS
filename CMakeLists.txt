@@ -12,6 +12,8 @@ include_directories(linux/kernel/src/mouse)
 include_directories(linux/kernel/src/queue)
 include_directories(linux/kernel/src/utils)
 
+include_directories(linux/test)
+
 add_executable(SuOS
         linux/kernel/src/asmfunc/asmfunc.h
         linux/kernel/src/asmfunc/asmfunc.asm
@@ -32,4 +34,12 @@ add_executable(SuOS
         linux/kernel/src/header.h
         linux/kernel/src/int.c
         linux/kernel/src/main.c
-        linux/kernel/src/mmu.h)
+        linux/kernel/src/mmu.h
+        linux/test/test_utils.c
+        linux/kernel/src/memory/memory.cpp linux/kernel/src/memory/memory.h)
+
+add_definitions(-D__ASSEMBLER__)
+
+
+
+#add_executable(test_utils linux/test/test_utils.c)

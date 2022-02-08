@@ -6,16 +6,21 @@ OUT_LST = $(OUTPUT)/suos.lst
 OUT_FLOPPY = $(OUTPUT)/floppy.bin
 KERNEL = kernel/$(OUTPUT)/kernel
 
-# QEMU = qemu-system-x86_64
-QEMU = qemu-system-i386
 EDIMG = $(BIN)/edimg.sh
 TMP_DIR = /tmp/floppy
 MOUNT = sudo mount
 UMOUNT = sudo umount
 UID = $(shell id -u)
 GID = $(shell id -g)
-
+MAKE = make --no-print-directory
+# ====== debug
 debug_build = false
+
+# ==== QEMU =======
+# QEMU = qemu-system-x86_64
+MEMORY = 32768K
+QEMU = qemu-system-i386
+QEMU += -m $(MEMORY)
 
 .PHONY: list clean kernel
 all: build
@@ -28,19 +33,19 @@ run: build
 	$(QEMU) -drive file=$(IMG),if=floppy
 
 kernel:
-	make -C kernel build debug_build=$(debug_build)
+	$(MAKE) -C kernel build debug_build=$(debug_build)
 
 debug:
-	make build debug_build=true
+	$(MAKE) build debug_build=true
 #	$(QEMU) -drive file=$(IMG),if=floppy -gdb tcp:0.0.0.0:1234 -S
 	$(QEMU) -fda $(IMG) -s -S
 
 copy: $(IMG) $(KERNEL)
 	mkdir -p $(TMP_DIR)
-	make mount
+	$(MAKE) mount
 #	cp $(OUT_FLOPPY) $(TMP_DIR)
 	cp $(KERNEL) $(TMP_DIR)
-	make umount
+	$(MAKE) umount
 
 mount: $(IMG)
 	$(MOUNT) -o loop,fat=12,uid=$(UID),gid=$(GID) $(IMG) $(TMP_DIR)
@@ -64,4 +69,4 @@ list:
 
 clean:
 	rm -fr $(OUTPUT)
-	cd ./kernel;make clean
+	$(MAKE) -C kernel clean

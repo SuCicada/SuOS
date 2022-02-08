@@ -13,7 +13,7 @@ CFLAGS += -I. $(patsubst %, -I%, $(shell find src -type d -not -path ./output ))
 #  -MD
 # CFLAGS += -fno-omit-frame-pointer
 # 编译后显示所有警告
-CFLAGS += -Wall -Wno-format -Wno-unused -Werror
+CFLAGS += -Wall -Wno-format -Wno-unused
 # debug info
 CFLAGS += -gstabs
 CFLAGS += -m32 -march=i486

@@ -10,9 +10,13 @@
  */
 char tmp_string[128];
 
+unsigned int memtest_sub(unsigned int start, unsigned int end);
+
+unsigned int memtest(unsigned int start, unsigned int end);
+
 _Noreturn void bootmain(void) {
 
-    struct BootInfo* binfo = (struct BootInfo*)ADR_BOOTINFO;
+    struct BootInfo *binfo = (struct BootInfo *) ADR_BOOTINFO;
     init_gdtidt();
     init_pic();
     io_sti(); /* IDT/PIC的初始化已经完成，于是开放CPU的中断 */
@@ -27,8 +31,13 @@ _Noreturn void bootmain(void) {
     init_palette();
     init_screen();
 
+    unsigned int memory_size;
+    memory_size = memtest(0x00400000, 0xbfffffff) / (1024 );
+    su_sprintf(tmp_string, "memory_size = %d KB", memory_size);
+    putfonts8_asc(0, 0, COL8_FFFFFF, tmp_string);
+
     su_sprintf(tmp_string, "DISPLAY_X_SIZE = %d ", DISPLAY_X_SIZE);
-    putfonts8_asc(5, 10, COL8_FFFFFF, tmp_string);
+    putfonts8_asc(0, FONT_Y_SIZE, COL8_FFFFFF, tmp_string);
 
     init_mouse_cursor8();
 
@@ -67,69 +76,86 @@ _Noreturn void bootmain(void) {
         keybuf_deal();
         mousebuf_deal();
 
-        a++;
+//        a++;
     }
     // io_hlt();
 }
 
 
 #define EFLAGS_AC_BIT       0x00040000
-#define CR0_CACHE_DISABLE	0x60000000
-unsigned int memtest_sub(unsigned int start, unsigned int end);
+#define CR0_CACHE_DISABLE    0x60000000
 
-unsigned int memtest(unsigned int start, unsigned int end)
-{
-	char flg486 = 0;
-	unsigned int eflg, cr0, i;
 
-	/* 确认CPU是386还是486以上的 */
-	eflg = io_load_eflags();
-	eflg |= EFLAGS_AC_BIT; /* AC-bit = 1 */
-	io_store_eflags(eflg);
-	eflg = io_load_eflags();
-	if ((eflg & EFLAGS_AC_BIT) != 0) {
-		/* 如果是386，即使设定AC=1，AC的值还会自动回到0 */
-		flg486 = 1;
-	}
+unsigned int memtest(unsigned int start, unsigned int end) {
+    char flg486 = 0;
+    unsigned int eflg, cr0, i;
 
-	eflg &= ~EFLAGS_AC_BIT; /* AC-bit = 0 */
-	io_store_eflags(eflg);
+    /* 确认CPU是386还是486以上的 */
+    eflg = io_load_eflags();
+    eflg |= EFLAGS_AC_BIT; /* AC-bit = 1 */
+    io_store_eflags(eflg);
+    eflg = io_load_eflags();
+    if ((eflg & EFLAGS_AC_BIT) != 0) {
+        /* 如果是386，即使设定AC=1，AC的值还会自动回到0 */
+        flg486 = 1;
+    }
 
-	if (flg486 != 0) {
-		cr0 = load_cr0();
-		cr0 |= CR0_CACHE_DISABLE; /* 禁止缓存 */
-		store_cr0(cr0);
-	}
+    eflg &= ~EFLAGS_AC_BIT; /* AC-bit = 0 */
+    io_store_eflags(eflg);
 
-	i = memtest_sub(start, end);
+    if (flg486 != 0) {
+        cr0 = load_cr0();
+        cr0 |= CR0_CACHE_DISABLE; /* 禁止缓存 */
+        store_cr0(cr0);
+    }
 
-	if (flg486 != 0) {
-		cr0 = load_cr0();
-		cr0 &= ~CR0_CACHE_DISABLE; /* 允许缓存 */
-		store_cr0(cr0);
-	}
+    i = memtest_sub(start, end);
 
-	return i;
+    if (flg486 != 0) {
+        cr0 = load_cr0();
+        cr0 &= ~CR0_CACHE_DISABLE; /* 允许缓存 */
+        store_cr0(cr0);
+    }
+
+    return i;
 }
 
-unsigned int memtest_sub(unsigned int start, unsigned int end){
-    unsigned int i, old, pat0=0xaa55aa55, pat1=0x55aa55aa;
-    volatile unsigned int *p;
-    for(i=start; i<=end; i+=0x1000){
-        p = (unsigned int *)(i+0xffc);
+#pragma clang diagnostic ignored "-Wint-to-pointer-cast"
+
+unsigned int memtest_sub(unsigned int start, unsigned int end) {
+    unsigned int i, *p, old;
+
+    const unsigned int pat0 = 0xaa55aa55;
+    const unsigned int pat1 = 0x55aa55aa;
+    int ii = 0;
+    for (i = start; i <= end; i += 0x1000) {  //4KBずつチェック
+        p = (unsigned int *) (i + 0xffc); //4KBの下位4byteを見る
+        //戻せるように今の値を覚えておく
         old = *p;
+        //テスト用のデータを入れてbit反転
         *p = pat0;
         *p ^= 0xffffffff;
-        if(*p!=pat1){
-            not_memory:
+        //正常に反転できていなければ値をもどして抜ける
+        if (*p != pat1) {
             *p = old;
             break;
         }
+        //再反転して同じように値をチェックする
         *p ^= 0xffffffff;
-        if(*p!=pat0){
-            goto not_memory;
+        if (*p != pat0) {
+            *p = old;
+            break;
         }
-        *p = old;
+
+
+        if (ii++ % 10000 == 0) {
+            boxfill8_s(0, 0, 25 * FONT_Y_SIZE, FONT_Y_SIZE, BACK_COLOR);
+            su_sprintf(tmp_string, "memory_check  %u/%u ",
+                       (i - start) / 0x100, (end - start) / 0x100);
+            putfonts8_asc(0, 0, COL8_FFFFFF, tmp_string);
+        }
     }
+    boxfill8_s(0, 0, 25 * FONT_Y_SIZE, FONT_Y_SIZE, BACK_COLOR);
     return i;
 }
+
