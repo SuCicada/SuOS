@@ -18,13 +18,13 @@ debug_build = false
 
 # ==== QEMU =======
 # QEMU = qemu-system-x86_64
-MEMORY = 32768K
+MEMORY = 32M # 32768K
 QEMU = qemu-system-i386
 QEMU += -m $(MEMORY)
 
 .PHONY: list clean kernel
 all: build
-build: kernel $(OS_BIN) $(IMG) copy
+build: kernel $(OS_BIN) $(IMG) # copy
 	@echo "=========================="
 	@echo "|| build su_img success ||"
 	@echo "=========================="
@@ -32,8 +32,12 @@ build: kernel $(OS_BIN) $(IMG) copy
 run: build
 	$(QEMU) -drive file=$(IMG),if=floppy
 
+START_ADDRESS = 0x008200
+START_ADDRESS = 0xc400
+
 kernel:
-	$(MAKE) -C kernel build debug_build=$(debug_build)
+	$(MAKE) -C kernel build \
+		debug_build=$(debug_build) START_ADDRESS=$(START_ADDRESS)
 
 debug:
 	$(MAKE) build debug_build=true
@@ -41,14 +45,15 @@ debug:
 	$(QEMU) -fda $(IMG) -s -S
 
 copy: $(IMG) $(KERNEL)
+# 使用copy方式的话, kernel 地址为 0xc400
 	mkdir -p $(TMP_DIR)
 	$(MAKE) mount
-#	cp $(OUT_FLOPPY) $(TMP_DIR)
+	cp $(OUT_FLOPPY) $(TMP_DIR)
 	cp $(KERNEL) $(TMP_DIR)
 	$(MAKE) umount
 
 mount: $(IMG)
-	$(MOUNT) -o loop,fat=12,uid=$(UID),gid=$(GID) $(IMG) $(TMP_DIR)
+	$(MOUNT) -o users,loop,fat=12,uid=$(UID),gid=$(GID) $(IMG) $(TMP_DIR)
 
 umount:
 	$(UMOUNT) $(TMP_DIR)
@@ -57,9 +62,10 @@ $(OS_BIN) : suos.asm Makefile output
 	nasm -g -o $@ -l $(OUT_LST) $<
 # nasm -o $(OUT_FLOPPY) -l $(OUTPUT)/floppy.lst floppy.nas
 
+img: $(IMG)
 $(IMG): $(OS_BIN) $(KERNEL)
 # 制作一个 1.44MB 的文件用于作为软盘文件
-	$(EDIMG) $< $@
+	$(EDIMG) $^ $@
 
 $(OUTPUT):
 	mkdir -p $(OUTPUT)

@@ -1,6 +1,9 @@
 ; hello-os
 ; TAB=4
-CYLS    EQU 10
+; 这里都是 16位模式的代码
+
+CYLS        EQU 10
+KERNEL      EQU 0x200
 
     ORG     0x7c00          ; このプログラムがどこに読み込まれるのか
 ; 以下は標準的なFAT12フォーマットフロッピーディスクのための記述
@@ -25,10 +28,10 @@ CYLS    EQU 10
     DB      "SuCicada-OS"   ; ディスクの名前（11バイト）
     DB      "FAT12   "      ; フォーマットの名前（8バイト）
     RESB    16              ; とりあえず18バイトあけておく
- 
+
 ; プログラム本
 
-entry:  
+entry:
     MOV     AX,0
     MOV     SS,AX
     MOV     SP,0x7c00
@@ -36,12 +39,13 @@ entry:
 ; ディスクを読む
 ; 0x8000 -> 0x81ff 是给启动区的
 ; 我们要将磁盘读到 [ES:BX] 即 0x0820 * 0x10 + [BX]
-    MOV     AX,0x0820 
+    MOV     AX,0x0820
     MOV     ES,AX
     MOV     DL,0
     MOV     DH,0    ; 磁头 0
     MOV     CH,0    ; 柱面 0
     MOV     CL,2    ; 扇区 2
+
 readloop:
     MOV     SI,0
 retry:
@@ -49,11 +53,11 @@ retry:
     MOV     AH,0x02 ; 读盘操作标识
     MOV     BX,0
     INT     0x13    ; 调用磁盘BIOS
-    JNC     next    
+    JNC     next
 
     ADD     SI,1
-    CMP     SI,5 
-    JAE     error    
+    CMP     SI,5
+    JAE     error
     MOV     AH,0x00
     MOV     DL,0
     INT     0x13
@@ -65,16 +69,15 @@ next:
     ADD     AX,0x0020
     MOV     ES,AX
     ; 再读取一个扇区, 一共18个
-    ADD     CL,1    
+    ADD     CL,1
     CMP     CL,18
     JNA     readloop
-    
+
     ; 再读取一个完整磁头, 一共2个
-    ADD     DH,1    
-    MOV     CL,1   
+    ADD     DH,1
+    MOV     CL,1
     CMP     DH,2
     JB      readloop
-
     ; 再读取一个完整柱面, 一共CYLS个
     ADD     CH,1
     MOV     DH,0
@@ -82,27 +85,35 @@ next:
     CMP     CH,CYLS
     JB      readloop
 
-    MOV     SI,msg
-    JMP     putloop
+;MOV     SI,msg
+;CALL    putloop
 
+;    MOV     SI,msg
+;    JMP     putloop
+    JMP     fin
 
-putloop:    
+putloop:
+putloop0:
     MOV     AL,[SI]
     ADD     SI,1
     CMP     AL,0
-    JE      fin
+    JE      put_over
     MOV     AH,0x0e
     MOV     BX,10
     INT     0x10
-    JMP     putloop
+    JMP     putloop0
+put_over:
+;    JMP     fin
+    RET
 
 fin:
-    MOV     [0x0ff0],CH    
-    JMP     0xc400
+    MOV     [0x0ff0],CH
+    JMP     0x8200 ; 0xc400
+
 fin_loop:
     HLT                     ; 何かあるまでCPUを停止させる
     JMP     fin_loop
-    
+
 error:
     MOV     SI,error_msg
     JMP     putloop

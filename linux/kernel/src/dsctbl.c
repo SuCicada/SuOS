@@ -47,7 +47,9 @@ void init_gdtidt(void)
 	load_gdtr(LIMIT_GDT, ADR_GDT);
 
 
-	/* IDT初始化 */
+	/* IDT初始化
+	 * 除以 8 的原因是 GATE_DESCRIPTOR 有 8 byte
+	 * */
 	for (i = 0; i <= LIMIT_IDT / 8; i++) {
 		set_gatedesc(idt + i, 0, 0, 0);
 	}

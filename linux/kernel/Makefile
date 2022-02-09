@@ -1,4 +1,5 @@
-addr = 0xc400
+# get from outer makefile
+START_ADDRESS = 0 # 0x008200 # 0xc400
 debug_build = false
 
 OUTPUT=output
@@ -87,7 +88,7 @@ kernel_cmd += \
 endif
 
 $(OUTPUT)/entry: $(ENTRY_OBJ_FILES)
-	ld $(LDFLAGS) -N -e entry -Ttext $(addr) -o $@.out $^
+	ld $(LDFLAGS) -N -e entry -Ttext $(START_ADDRESS) -o $@.out $^
 	$(kernel_obj_cmd)
 
 $(OUTPUT)/code: $(CODE_OBJ_FILES)

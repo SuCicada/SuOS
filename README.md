@@ -32,3 +32,6 @@ https://blog.csdn.net/ice__snow/article/details/50654629
 [内存分配---FF、BF、WF三种算法](https://www.cnblogs.com/XNQC1314/p/9065236.html)
 [伙伴算法](https://blog.csdn.net/wenqian1991/article/details/27968779)
 [高效管理MCU内存的6种分配算法对比](https://blog.csdn.net/DFWee/article/details/121243864)
+https://forum.ubuntu.org.cn/viewforum.php?f=120&start=650
+https://forum.ubuntu.org.cn/viewtopic.php?f=120&t=72346
+http://duimovich.blogspot.com
