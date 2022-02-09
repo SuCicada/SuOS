@@ -27,8 +27,11 @@ KERNEL      EQU 0x200
     DD      0xffffffff      ; たぶんボリュームシリアル番号
     DB      "SuCicada-OS"   ; ディスクの名前（11バイト）
     DB      "FAT12   "      ; フォーマットの名前（8バイト）
-    RESB    16              ; とりあえず18バイトあけておく
-
+; http://computer-programming-forum.com/45-asm/23ead52c1ca9639a.htm
+; warning: uninitialized space declared in .text section: zeroing [-w+other]
+; replace RESB with TIMES
+;    RESB    16              ; とりあえず18バイトあけておく
+    TIMES   16  DB 0
 ; プログラム本
 
 entry:
@@ -134,7 +137,8 @@ msg:
     DB      0x0d
     DB      0
 
-    RESB    510-($-$$)         ; 0x001feまでを0x00で埋める命令
+;    RESB    510-($-$$)         ; 0x001feまでを0x00で埋める命令
+    TIMES    510-($-$$)   DB 0
 
     DB      0x55, 0xaa
 

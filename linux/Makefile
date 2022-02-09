@@ -32,11 +32,11 @@ build: kernel $(OS_BIN) $(IMG) # copy
 run: build
 	$(QEMU) -drive file=$(IMG),if=floppy
 
+#START_ADDRESS = 0xc400
 START_ADDRESS = 0x008200
-START_ADDRESS = 0xc400
 
 kernel:
-	$(MAKE) -C kernel build \
+	$(MAKE) -C kernel build -j \
 		debug_build=$(debug_build) START_ADDRESS=$(START_ADDRESS)
 
 debug:
