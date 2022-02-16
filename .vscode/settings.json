@@ -17,7 +17,8 @@
     "queue.h": "c",
     "mouse.h": "c",
     "utils.h": "c",
-    "keyboard.h": "c"
+    "keyboard.h": "c",
+    "_mingw_print_push.h": "c"
   },
   "C_Cpp_Runner.warnings": [
     "-Wall",

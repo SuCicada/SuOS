@@ -35,3 +35,7 @@ https://blog.csdn.net/ice__snow/article/details/50654629
 https://forum.ubuntu.org.cn/viewforum.php?f=120&start=650
 https://forum.ubuntu.org.cn/viewtopic.php?f=120&t=72346
 http://duimovich.blogspot.com
+
+## knowledge
+- debug 32 bit exe in 64 bit
+  sudo apt-get install gdb-multiarch
