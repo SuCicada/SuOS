@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "../kernel/queue.c"
+#include "../kernel/src/queue/queue.c"
 
 int main() {
 

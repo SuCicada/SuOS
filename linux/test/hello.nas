@@ -38,7 +38,7 @@ putloop:
 	;循环显示字符
 	;通过0x10中断，显示一个字符
 	mov al, [si]
-	add si, 1
+	tree_add si, 1
 	cmp al, 0
 	je fin
 	mov ah, 0x0e
