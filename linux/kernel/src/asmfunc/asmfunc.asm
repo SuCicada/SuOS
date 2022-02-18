@@ -13,6 +13,7 @@ section .text
 	GLOBAL 	asm_inthandler21, asm_inthandler2c, asm_inthandler27
 	EXTERN  inthandler21, inthandler2c, inthandler27
 
+
 ; 以下は実際の関数
 
 

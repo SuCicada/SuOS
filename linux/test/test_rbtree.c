@@ -36,9 +36,18 @@ int main() {
     RB_Node nodes[nodes_num];
     tree_init(tree_ptr, nodes, sizeof(nodes) / sizeof(RB_Node));
     for (int i = 0; i < sizeof(need_add) / sizeof(int); i++) {
-//        tree_add(tree_ptr, need_add[i]);
+        tree_add(tree_ptr, need_add[i]);
     }
     show(tree_ptr);
 //    int res = find(2);
 //    printf("res %d\n", res);
 }
+
+
+/*
+ 关于 RB_Tree* 的变量名的讲究:
+ node_site: 代表 node 的位置. 并不指具体的 node. 即指向的空间中不一定有具体数据
+ node: 代表确实存在的 node 的位置.
+
+
+ * */

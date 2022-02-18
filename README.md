@@ -1,7 +1,9 @@
 todo
 [ ] 检测环境中 objconv, 自动安装
-[ ] 设置选项 开启是否要 编译之后反编译转 asm
 [ ] 规范头文件, 补充 ifndef
+[ ] queue 优化
+[x] 设置选项 开启是否要 编译之后反编译转 asm
+
 - 内存管理:
   - malloc 实现
   - 边界标记法 ptmalloc
@@ -36,4 +38,7 @@ https://forum.ubuntu.org.cn/viewforum.php?f=120&start=650
 https://forum.ubuntu.org.cn/viewtopic.php?f=120&t=72346
 http://duimovich.blogspot.com
 
+[30张图带你彻底理解红黑树](https://www.jianshu.com/p/e136ec79235c)
+
 ## knowledge
+

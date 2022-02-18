@@ -1,0 +1,38 @@
+/*
+
+1. memory_map
+    container[memory_free_block]
+2. memory_free_block
+
+// (int) [size] 最大申请 < 4G, 对于32位系统够用了
+// ....  [data]
+struct Memory_Free_Block{
+    void* address;
+}
+
+3.
+
+malloc
+    register new
+free
+
+
+int get_block_size(mem_block){
+    return *(int*)(p-1);
+}
+
+compare(node n1,node n2):
+    n1.size - n2.size
+
+void* malloc(int size):
+    new_block = add(size);
+    if(new_block)
+    origin_free_block = find_parent(new_block)
+    remove(origin_free_block)
+    new_free_block = reduce_size(origin_free_block, size)
+    add(new_free_block);
+
+free(void* p):
+    int size = get_block_size();
+
+*/
