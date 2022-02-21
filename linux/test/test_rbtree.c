@@ -31,10 +31,15 @@ int main() {
             3,
             4
     };
+    RB_Node nodes[nodes_num];
+    ArrayList arraylist_data;
+    ArrayList *arraylist = &arraylist_data;
+    arraylist_init(arraylist, nodes, sizeof(RB_Node), nodes_num);
+
     RB_Tree tree;
     RB_Tree *tree_ptr = &tree;
-    RB_Node nodes[nodes_num];
-    tree_init(tree_ptr, nodes, sizeof(nodes) / sizeof(RB_Node));
+    tree_init(tree_ptr, arraylist, sizeof(nodes) / sizeof(RB_Node));
+
     for (int i = 0; i < sizeof(need_add) / sizeof(int); i++) {
         tree_add(tree_ptr, need_add[i]);
     }

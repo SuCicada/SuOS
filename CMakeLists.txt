@@ -36,7 +36,7 @@ add_executable(SuOS
         linux/kernel/src/main.c
         linux/kernel/src/mmu.h
         linux/test/test_utils.c
-        linux/kernel/src/memory/memory.cpp linux/kernel/src/memory/memory.h linux/kernel/src/rbtree/rbtree.c linux/kernel/src/rbtree/rbtree.h linux/test/test_rbtree.c)
+        linux/kernel/src/memory/memory.cpp linux/kernel/src/memory/memory.h linux/kernel/src/rbtree/rbtree.c linux/kernel/src/rbtree/rbtree.h linux/test/test_rbtree.c linux/kernel/src/rbtree/arraylist.c linux/test/test_arraylist.c)
 
 add_definitions(-D__ASSEMBLER__)
 
