@@ -106,7 +106,7 @@ void mousebuf_deal() {
 
     if (mouse_dec.group_flag == 3) {
         mouse_dec.group_flag = 0;
-        // show
+        // tree_show
         unsigned char m0 = mouse_dec.group[0];
         // 高4位中低2位与x,y的移动方向有关，
         // 当bit4为1时，表示鼠标向－x方向移动，当bit5为1时表示鼠标向-y方向移动

@@ -15,6 +15,7 @@ struct RB_Node {
     int value;
     struct RB_Node *left;
     struct RB_Node *right;
+    struct RB_Node *parent;
 };
 
 #define RB_Node struct RB_Node
@@ -43,14 +44,15 @@ struct RB_Tree {
 // (level begin from 1, index begin from 0, i begin form 1)
  node.left  = (index+1)*2-1   = node.index * 2 + 1
  node.right = (index+1)*2-1+1 = node.index * 2 + 2
- node.father= int(i / 2) = int(node.index-1 / 2)
+ node.parent= int(i / 2) = int(node.index-1 / 2)
  */
 #define node_left(i) ((i) * 2 + 1)
 #define node_right(i) ((i) * 2 + 2)
 #define node_father(i) ((int)(((i)-1)/2))
 #define node_data_get(i) (arr[i])
 #define node_data_set(i, d) (arr[i]=(d))
-//#define node_is_root(i) ((i)==0)
+//#define tree_node_is_root(i) ((i)==0)
+#define RB_Node_Root 0
 #define RB_Node_Left 1
 #define RB_Node_Right 2
 
@@ -78,123 +80,187 @@ void tree_init(RB_Tree *tree, ArrayList *nodes_mem, int capacity) {
 }
 
 
-RB_Node *tree_get_node(RB_Tree *tree, int i) {
-    if (i < tree->capacity)
-        return tree->nodes[i];
-    else
-        return NULL;
+//RB_Node *tree_get_node(RB_Tree *tree, int i) {
+//    if (i < tree->capacity)
+//        return tree->nodes[i];
+//    else
+//        return NULL;
+//}
+
+//RB_Node *tree_get_root(RB_Tree *tree) {
+//    return tree_get_node(tree, 0);
+//}
+
+//RB_Node *tree_node_get_left(RB_Tree *tree, RB_Node *node) {
+//    return tree_get_node(tree, node_left(node->index));
+//}
+//
+//RB_Node *tree_node_get_right(RB_Tree *tree, RB_Node *node) {
+//    return tree_get_node(tree, node_right(node->index));
+//}
+//
+//RB_Node *tree_node_get_father(RB_Tree *tree, RB_Node *node) {
+//    return tree_get_node(tree, node_father(node->index));
+//}
+
+RB_Node *node_get_grandfather(RB_Node *node) {
+//    return tree_get_node(tree, node_father(node_father(node->index)));
+    return node->parent->parent;
 }
 
-RB_Node *tree_get_root(RB_Tree *tree) {
-    return tree_get_node(tree, 0);
+RB_Node *node_get_uncle(RB_Node *node) {
+//    int father_index = node_father(node->index);
+//    int uncle_index = father_index + (father_index % 2) * 1;
+//    return tree_get_node(tree, uncle_index);
+    RB_Node *parent = node->parent;
+    RB_Node *grandfather = parent->parent;
+    return grandfather->left == parent ? grandfather->right : grandfather->left;
 }
 
-RB_Node *tree_node_get_left(RB_Tree *tree, RB_Node *node) {
-    return tree_get_node(tree, node_left(node->index));
-}
-
-RB_Node *tree_node_get_right(RB_Tree *tree, RB_Node *node) {
-    return tree_get_node(tree, node_right(node->index));
-}
-
-RB_Node *tree_node_get_father(RB_Tree *tree, RB_Node *node) {
-    return tree_get_node(tree, node_father(node->index));
-}
-
-RB_Node *tree_node_get_uncle(RB_Tree *tree, RB_Node *node) {
-    int father_index = node_father(node->index);
-    int uncle_index = father_index + (father_index % 2) * 1;
-    return tree_get_node(tree, uncle_index);
-}
-
-RB_Node *tree_node_get_grandfather(RB_Tree *tree, RB_Node *node) {
-    return tree_get_node(tree, node_father(node_father(node->index)));
-}
 
 //bool tree_node_empty(RB_Tree *tree, RB_Node *node) {
 //    return tree_get_node(tree, node->index)->color == NULL;
+//}
+
+//bool node_empty(RB_Node *node) {
+//    return node->color == NULL;
+//}
+
+/** 狸猫换太子 */
+void node_reset_parent(RB_Node *node, RB_Node *new_node) {
+    RB_Node *parent = node->parent;
+    if (parent->left == node)
+        parent->left = new_node;
+    else if (parent->right == node)
+        parent->right = new_node;
+
+    new_node->parent = parent;
 }
 
-bool node_empty(RB_Node *node) {
-    return node->color == NULL;
+void node_left_rotate(RB_Node *node) {
+    RB_Node *right = node->right;
+    // 换老爹
+    node_reset_parent(node, right);
+
+    // 换犬子
+    node->right = right->left;
+
+    // 身份颠倒
+    node->parent = right;
+    right->left = node;
 }
 
-void tree_node_left_rotate(RB_Tree *tree, RB_Node *node) {
+void node_right_rotate(RB_Node *node) {
+    RB_Node *left = node->left;
+    // 换老爹
+    node_reset_parent(node, left);
 
+    // 换犬子
+    node->left = left->right;
+
+    // 身份颠倒
+    node->parent = left;
+    left->right = node;
 }
 
-void tree_node_right_rotate(RB_Tree *tree, RB_Node *node) {
-
-}
-
-RB_Node *find0(RB_Tree *tree, RB_Node *current,
-               int n, bool is_update);
+//RB_Node *find0(RB_Tree *tree, RB_Node *current,
+//               int n, bool is_add);
 
 
-bool node_is_root(RB_Node *node) {
-    return node->index == 0;
+bool tree_node_is_root(RB_Tree *tree, RB_Node *node) {
+//    return node->index == 0;
+    return tree->root == node;
 }
 
 int node_get_branch_direction(RB_Node *node) {
-    return node->index % 2 == 1 ? RB_Node_Left : RB_Node_Right;
+//    return node->index % 2 == 1 ? RB_Node_Left : RB_Node_Right;
+    return node->parent->left == node ?
+           RB_Node_Left : RB_Node_Right;
 }
 
 void node_set_color(RB_Node *node, char color) {
     node->color = color;
 }
 
-RB_Node *find(RB_Tree *tree, int n) {
-    RB_Node *root = tree_get_root(tree);
-    return find0(tree, root, n, FALSE);
-}
+
+bool tree_auto_balance(RB_Tree *tree, RB_Node *current_node);
 
 /**
- current_node: where site of node which will put
+ parent_children_ptr: where site of node which will put
  */
+RB_Node *tree_add_node(RB_Tree *tree,
+//                       RB_Node **parent_children_ptr,
+                       int value) {
+    RB_Node *node = (RB_Node *) arraylist_malloc(tree->nodes_mem);
+    node->left = node->right = NULL;
+    node->value = value;
+//    node->parent = parent;
+//    *parent_children_ptr = node;
+//    switch (children_direction) {
+//        case RB_Node_Left:
+//            parent->left = node;
+//            break;
+//        case RB_Node_Right:
+//            parent->right = node;
+//            break;
+//        case RB_Node_Root:
+//            node->parent = NULL;
+//            tree->root = node;
+//            break;
+//        default:
+//            break;
+//    }
+
+//    tree_auto_balance(tree, node);
+    return node;
+}
+
+
 bool tree_auto_balance(RB_Tree *tree, RB_Node *current_node) {
 //    current_node->value = value;
-    if (node_is_root(current_node)) {
+    if (tree_node_is_root(tree, current_node)) {
         // 1. empty tree
         current_node->color = RB_Node_Black;
         return TRUE;
     }
 
-    RB_Node *father_node = tree_node_get_father(tree, current_node);
-    char father_node_color = father_node->color;
+//    RB_Node *parent_node = tree_node_get_father(tree, current_node);
+    RB_Node *parent_node = current_node->parent;
+    char father_node_color = parent_node->color;
     if (father_node_color == RB_Node_Black) {
-        // 2. current_node 's father is black
+        // 2. current_node 's parent is black
         current_node->color = RB_Node_Red;
         return TRUE;
 
     } else if (father_node_color == RB_Node_Red) {
-        // 3. father is red
-        RB_Node *uncle_node = tree_node_get_uncle(tree, current_node);
-        bool uncle_node_is_empty = node_empty(uncle_node);
-        RB_Node *grandfather_node = tree_node_get_grandfather(tree, current_node);
+        // 3. parent is red
+        RB_Node *uncle_node = node_get_uncle(current_node);
+//        bool uncle_node_is_empty = uncle_node == NULL;
+        RB_Node *grandfather_node = node_get_grandfather(current_node);
 
-        if (!uncle_node_is_empty &&
+        if (uncle_node != NULL &&
             uncle_node->color == RB_Node_Red) {
-            // 3.1 father is red, and uncle node is red
-            node_set_color(father_node, RB_Node_Black);
+            // 3.1 parent is red, and uncle node is red
+            node_set_color(parent_node, RB_Node_Black);
             node_set_color(uncle_node, RB_Node_Black);
             node_set_color(grandfather_node, RB_Node_Red);
             tree_auto_balance(tree, grandfather_node);
             return TRUE;
 
-        } else if (uncle_node_is_empty ||
+        } else if (uncle_node == NULL ||
                    uncle_node->color == RB_Node_Black) {
             // 3.2 uncle is black or empty
             int branch_direction = node_get_branch_direction(current_node);
             if (branch_direction == RB_Node_Right) {
-                // 3.2.1 father is red, uncle is black. current is right children
-                tree_node_left_rotate(tree, father_node);
+                // 3.2.1 parent is red, uncle is black. current is right children
+                node_left_rotate(parent_node);
                 return TRUE;
 
             } else if (branch_direction == RB_Node_Left) {
-                // 3.2.2 father is red, uncle is black. current is left children
-                node_set_color(father_node, RB_Node_Black);
+                // 3.2.2 parent is red, uncle is black. current is left children
+                node_set_color(parent_node, RB_Node_Black);
                 node_set_color(grandfather_node, RB_Node_Red);
-                tree_node_right_rotate(tree, father_node);
+                node_right_rotate(grandfather_node);
                 return TRUE;
 
             }
@@ -209,16 +275,27 @@ int node_value_compare(int a, int b) {
     return a - b;
 }
 
-RB_Node *find0(RB_Tree *tree, RB_Node *current,
-               int value, bool is_update) {
-    if (node_empty(current)) {
-//        printf("empty \n");
-        if (is_update) {
-//            node_data_set(current, n);
-            current->value = value;
-            tree_auto_balance(tree, current);
-            return current;
-        }
+/**
+todo
+ parent:      current's parent
+ current_ptr: current's parent's children's ptr
+ */
+RB_Node *find0(RB_Tree *tree,
+               RB_Node *current,
+               int value,
+               RB_Node **_return_parent_ptr,
+               RB_Node ***_return_parent_children_ptr_ptr
+) {
+
+//    RB_Node *current = *current_ptr;
+    if (current == NULL) {
+//        if (is_add) {
+//            RB_Node *new_node = tree_add_node(tree, parent, current_ptr, value);
+////            *current_ptr = new_node;
+////            tree_auto_balance(tree, new_node);
+//
+//            return new_node;
+//        }
         return NULL;
     }
 //    printf("%d %d ?????\n", value, current->index);
@@ -226,20 +303,48 @@ RB_Node *find0(RB_Tree *tree, RB_Node *current,
     int compare_res = node_value_compare(value, current_value);
     if (compare_res == 0) {
         return current;
-    } else if (compare_res < 0) {
-        // in left
-        RB_Node *left_node = tree_node_get_left(tree, current);
-        return find0(tree, left_node, value, is_update);
-    } else {
-        // in right
-        RB_Node *right_node = tree_node_get_right(tree, current);
-        return find0(tree, right_node, value, is_update);
     }
+
+    RB_Node **next_node_ptr;
+    if (compare_res < 0) { // in left
+        next_node_ptr = &current->left;
+    } else { // in right
+        next_node_ptr = &current->right;
+    }
+
+    if (_return_parent_ptr != NULL)
+        *_return_parent_ptr = current;
+    if (_return_parent_children_ptr_ptr != NULL)
+        *_return_parent_children_ptr_ptr = next_node_ptr;
+
+    RB_Node *next_node = *next_node_ptr;
+    return find0(tree, next_node, value, _return_parent_ptr, _return_parent_children_ptr_ptr);
 }
 
-bool tree_add(RB_Tree *tree, int value) {
-    RB_Node *root = tree_get_root(tree);
-    return find0(tree, root, value, TRUE) != NULL;
+RB_Node *tree_find(RB_Tree *tree, int value) {
+    RB_Node *root = tree->root;
+    return find0(tree, root, value, NULL, NULL);
+}
+
+RB_Node *tree_add(RB_Tree *tree, int value) {
+    RB_Node *root = tree->root;
+//    int branch_direction;
+    RB_Node *res_parent;
+    RB_Node **res_parent_children_ptr;
+    RB_Node *new_node = tree_add_node(tree, value);
+
+    if (root != NULL) {
+        find0(tree, root, value, &res_parent, &res_parent_children_ptr);
+        new_node->parent = res_parent;
+        // parent->children = new_node
+        *res_parent_children_ptr = new_node;
+    } else {
+        tree->root = new_node;
+    }
+    printf("???????\n");
+
+    tree_auto_balance(tree, new_node);
+    return new_node;
 }
 
 

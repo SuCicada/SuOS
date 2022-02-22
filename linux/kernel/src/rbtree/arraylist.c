@@ -30,7 +30,7 @@ struct ArrayList {
 #define ArrayList struct ArrayList
 
 #define ArrayList_Node_Allocated_Flag ((char)0xfc)
-#define NULL ((void*)0)
+#define NULL ((void *)0)
 
 /** real space == (type_size + 1) * capacity
 */
