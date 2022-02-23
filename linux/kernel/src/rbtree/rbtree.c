@@ -126,21 +126,41 @@ RB_Node *node_get_uncle(RB_Node *node) {
 //    return node->color == NULL;
 //}
 
-/** 狸猫换太子 */
-void node_reset_parent(RB_Node *node, RB_Node *new_node) {
+/** 狸猫换太子
+ *  before: p is node->parent
+ *  after:  p is new_node->parent
+ * */
+void tree_node_reset_parent(RB_Tree *tree, RB_Node *node, RB_Node *new_node) {
     RB_Node *parent = node->parent;
-    if (parent->left == node)
-        parent->left = new_node;
-    else if (parent->right == node)
-        parent->right = new_node;
+    if (parent == NULL) {
+        tree->root = new_node;
 
-    new_node->parent = parent;
+    } else {
+        if (parent->left == node)
+            parent->left = new_node;
+        else if (parent->right == node)
+            parent->right = new_node;
+
+        new_node->parent = parent;
+    }
 }
 
-void node_left_rotate(RB_Node *node) {
+/**
+ X is current
+
+  [X]                Y
+  / \               / \
+ a   Y     ==>     [X] d
+    / \           /  \
+   c   d         a    c
+
+ */
+void node_left_rotate(RB_Tree *tree, RB_Node *node) {
     RB_Node *right = node->right;
     // 换老爹
-    node_reset_parent(node, right);
+    tree_node_reset_parent(tree, node, right);
+//    printf("%p %p %p\n", grandfather_node, parent_node, current_node);
+    printf("%d->%d\n", node->value, right->value);
 
     // 换犬子
     node->right = right->left;
@@ -150,10 +170,20 @@ void node_left_rotate(RB_Node *node) {
     right->left = node;
 }
 
-void node_right_rotate(RB_Node *node) {
+/**
+ Y is current
+
+    [Y]            X
+    / \           /  \
+   X   d  ==>    a   [Y]
+  / \                / \
+ a   c              c   d
+
+ */
+void tree_node_right_rotate(RB_Tree *tree, RB_Node *node) {
     RB_Node *left = node->left;
     // 换老爹
-    node_reset_parent(node, left);
+    tree_node_reset_parent(tree, node, left);
 
     // 换犬子
     node->left = left->right;
@@ -215,21 +245,31 @@ RB_Node *tree_add_node(RB_Tree *tree,
     return node;
 }
 
+void tree_node_rotate(RB_Tree *tree, RB_Node *node, int direction_flag) {
+    switch (direction_flag) {
+        case RB_Node_Left:
+            node_left_rotate(tree, node);
+            break;
+        case RB_Node_Right:
+            tree_node_right_rotate(tree, node);
+            break;
+        default:
+            break;
+    }
+}
 
 bool tree_auto_balance(RB_Tree *tree, RB_Node *current_node) {
-//    current_node->value = value;
     if (tree_node_is_root(tree, current_node)) {
         // 1. empty tree
         current_node->color = RB_Node_Black;
         return TRUE;
     }
+    current_node->color = RB_Node_Red;
 
-//    RB_Node *parent_node = tree_node_get_father(tree, current_node);
     RB_Node *parent_node = current_node->parent;
     char father_node_color = parent_node->color;
     if (father_node_color == RB_Node_Black) {
         // 2. current_node 's parent is black
-        current_node->color = RB_Node_Red;
         return TRUE;
 
     } else if (father_node_color == RB_Node_Red) {
@@ -249,22 +289,29 @@ bool tree_auto_balance(RB_Tree *tree, RB_Node *current_node) {
 
         } else if (uncle_node == NULL ||
                    uncle_node->color == RB_Node_Black) {
-            // 3.2 uncle is black or empty
-            int branch_direction = node_get_branch_direction(current_node);
-            if (branch_direction == RB_Node_Right) {
-                // 3.2.1 parent is red, uncle is black. current is right children
-                node_left_rotate(parent_node);
-                return TRUE;
+            // 3.2 parent is red, uncle is black or empty
+            int current_branch_direction = node_get_branch_direction(current_node);
+            int parent_branch_direction = node_get_branch_direction(parent_node);
 
-            } else if (branch_direction == RB_Node_Left) {
-                // 3.2.2 parent is red, uncle is black. current is left children
-                node_set_color(parent_node, RB_Node_Black);
-                node_set_color(grandfather_node, RB_Node_Red);
-                node_right_rotate(grandfather_node);
-                return TRUE;
+            if (parent_branch_direction != current_branch_direction) {
+                // 3.2.1 parent is red, uncle is black or empty.
+                // parent is right, current is left. ( right rotate )
+                // parent is left, current is right. ( left rotate )
+                tree_node_rotate(tree, parent_node, parent_branch_direction);
 
+                parent_node = current_node;
             }
 
+            // parent_branch_direction == current_branch_direction
+            // 3.2.2 parent is red, uncle is black or empty.
+            // parent is right, current is right ( left rotate ) or
+            // parent is left, current is left  ( right rotate )
+            node_set_color(parent_node, RB_Node_Black);
+            node_set_color(grandfather_node, RB_Node_Red);
+            tree_node_rotate(tree, grandfather_node,
+                             parent_branch_direction == RB_Node_Black ? RB_Node_Red : RB_Node_Black);
+
+            return TRUE;
         }
     }
     return TRUE;
@@ -333,15 +380,17 @@ RB_Node *tree_add(RB_Tree *tree, int value) {
     RB_Node **res_parent_children_ptr;
     RB_Node *new_node = tree_add_node(tree, value);
 
+    printf("%p\n", root);
     if (root != NULL) {
         find0(tree, root, value, &res_parent, &res_parent_children_ptr);
         new_node->parent = res_parent;
+
         // parent->children = new_node
         *res_parent_children_ptr = new_node;
     } else {
         tree->root = new_node;
+        new_node->parent = NULL;
     }
-    printf("???????\n");
 
     tree_auto_balance(tree, new_node);
     return new_node;

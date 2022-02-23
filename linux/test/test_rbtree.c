@@ -23,6 +23,7 @@ void tree_show0(RB_Node *node) {
 
 void tree_show(RB_Tree *tree) {
     tree_show0(tree->root);
+    printf("========================\n");
 //    for (int i = 0; i < 10; i++)
 //        printf("%2d |", i);
 //    printf("\n");
@@ -38,11 +39,13 @@ void tree_show(RB_Tree *tree) {
 #define nodes_num 10
 
 int main() {
+    // 1 2 3
+    // 1 3 5 4
+    // 1 3 2
     int need_add[] = {
-//            2,
-//            1,
-//            3,
-            4
+            1,
+            3,
+            2,
     };
     RB_Node nodes[nodes_num];
     ArrayList arraylist_data;
@@ -54,8 +57,8 @@ int main() {
 
     for (int i = 0; i < sizeof(need_add) / sizeof(int); i++) {
         tree_add(tree_ptr, need_add[i]);
-    }
     tree_show(tree_ptr);
+    }
 //    int res = find(2);
 //    printf("res %d\n", res);
 }
