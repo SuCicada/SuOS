@@ -102,6 +102,10 @@ void tree_init(RB_Tree *tree, ArrayList *nodes_mem, int capacity) {
 //RB_Node *tree_node_get_father(RB_Tree *tree, RB_Node *node) {
 //    return tree_get_node(tree, node_father(node->index));
 //}
+void tree_set_root(RB_Tree *tree, RB_Node *node) {
+    node->parent = NULL;
+    tree->root = node;
+}
 
 RB_Node *node_get_grandfather(RB_Node *node) {
 //    return tree_get_node(tree, node_father(node_father(node->index)));
@@ -133,7 +137,7 @@ RB_Node *node_get_uncle(RB_Node *node) {
 void tree_node_reset_parent(RB_Tree *tree, RB_Node *node, RB_Node *new_node) {
     RB_Node *parent = node->parent;
     if (parent == NULL) {
-        tree->root = new_node;
+        tree_set_root(tree,new_node);
 
     } else {
         if (parent->left == node)
@@ -159,8 +163,6 @@ void node_left_rotate(RB_Tree *tree, RB_Node *node) {
     RB_Node *right = node->right;
     // 换老爹
     tree_node_reset_parent(tree, node, right);
-//    printf("%p %p %p\n", grandfather_node, parent_node, current_node);
-    printf("%d->%d\n", node->value, right->value);
 
     // 换犬子
     node->right = right->left;
@@ -193,9 +195,6 @@ void tree_node_right_rotate(RB_Tree *tree, RB_Node *node) {
     left->right = node;
 }
 
-//RB_Node *find0(RB_Tree *tree, RB_Node *current,
-//               int n, bool is_add);
-
 
 bool tree_node_is_root(RB_Tree *tree, RB_Node *node) {
 //    return node->index == 0;
@@ -212,36 +211,15 @@ void node_set_color(RB_Node *node, char color) {
     node->color = color;
 }
 
-
 bool tree_auto_balance(RB_Tree *tree, RB_Node *current_node);
 
 /**
- parent_children_ptr: where site of node which will put
  */
 RB_Node *tree_add_node(RB_Tree *tree,
-//                       RB_Node **parent_children_ptr,
                        int value) {
     RB_Node *node = (RB_Node *) arraylist_malloc(tree->nodes_mem);
     node->left = node->right = NULL;
     node->value = value;
-//    node->parent = parent;
-//    *parent_children_ptr = node;
-//    switch (children_direction) {
-//        case RB_Node_Left:
-//            parent->left = node;
-//            break;
-//        case RB_Node_Right:
-//            parent->right = node;
-//            break;
-//        case RB_Node_Root:
-//            node->parent = NULL;
-//            tree->root = node;
-//            break;
-//        default:
-//            break;
-//    }
-
-//    tree_auto_balance(tree, node);
     return node;
 }
 
@@ -264,15 +242,15 @@ bool tree_auto_balance(RB_Tree *tree, RB_Node *current_node) {
         current_node->color = RB_Node_Black;
         return TRUE;
     }
-    current_node->color = RB_Node_Red;
+//    current_node->color = RB_Node_Red;
 
     RB_Node *parent_node = current_node->parent;
-    char father_node_color = parent_node->color;
-    if (father_node_color == RB_Node_Black) {
+//    char father_node_color = parent_node->color;
+    if (parent_node->color == RB_Node_Black) {
         // 2. current_node 's parent is black
         return TRUE;
 
-    } else if (father_node_color == RB_Node_Red) {
+    } else if (parent_node->color == RB_Node_Red) {
         // 3. parent is red
         RB_Node *uncle_node = node_get_uncle(current_node);
 //        bool uncle_node_is_empty = uncle_node == NULL;
@@ -310,7 +288,6 @@ bool tree_auto_balance(RB_Tree *tree, RB_Node *current_node) {
             node_set_color(grandfather_node, RB_Node_Red);
             tree_node_rotate(tree, grandfather_node,
                              parent_branch_direction == RB_Node_Black ? RB_Node_Red : RB_Node_Black);
-
             return TRUE;
         }
     }
@@ -375,22 +352,24 @@ RB_Node *tree_find(RB_Tree *tree, int value) {
 
 RB_Node *tree_add(RB_Tree *tree, int value) {
     RB_Node *root = tree->root;
-//    int branch_direction;
     RB_Node *res_parent;
     RB_Node **res_parent_children_ptr;
     RB_Node *new_node = tree_add_node(tree, value);
 
-    printf("%p\n", root);
     if (root != NULL) {
-        find0(tree, root, value, &res_parent, &res_parent_children_ptr);
+        RB_Node *res = find0(tree, root, value, &res_parent, &res_parent_children_ptr);
+        if (res) {
+            // 如果已经存在怎么办
+            return NULL;
+        }
         new_node->parent = res_parent;
 
         // parent->children = new_node
         *res_parent_children_ptr = new_node;
     } else {
-        tree->root = new_node;
-        new_node->parent = NULL;
+        tree_set_root(tree,new_node);
     }
+    new_node->color = RB_Node_Red;
 
     tree_auto_balance(tree, new_node);
     return new_node;

@@ -46,6 +46,7 @@ int main() {
             1,
             3,
             2,
+            12, 34, 21, 43221, 3123
     };
     RB_Node nodes[nodes_num];
     ArrayList arraylist_data;
@@ -57,7 +58,7 @@ int main() {
 
     for (int i = 0; i < sizeof(need_add) / sizeof(int); i++) {
         tree_add(tree_ptr, need_add[i]);
-    tree_show(tree_ptr);
+            tree_show(tree_ptr);
     }
 //    int res = find(2);
 //    printf("res %d\n", res);
