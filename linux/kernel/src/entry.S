@@ -28,7 +28,7 @@ try:
 
 puts:
     movb (%si),%al
-    tree_add $1,%si
+    add $1,%si
     cmp $0,%al
     je over
     movb $0x0e,%ah
@@ -180,8 +180,8 @@ memcpy:
   # mov %edx, %edi
   mov (%esi), %eax
   mov %eax, (%edi)
-  tree_add $4, %esi
-  tree_add $4, %edi
+  add $4, %esi
+  add $4, %edi
   loop memcpy
   ret
 
