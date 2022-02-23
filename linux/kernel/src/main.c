@@ -32,7 +32,7 @@ _Noreturn void bootmain(void) {
     init_screen();
 
     unsigned int memory_size;
-    memory_size = memtest(0x00400000, 0xffffffff) / (1024 );
+    memory_size = memtest(0x00400000, 0xffffffff) / (1024);
     su_sprintf(tmp_string, "memory_size = %d KB", memory_size);
     putfonts8_asc(0, 0, COL8_FFFFFF, tmp_string);
 

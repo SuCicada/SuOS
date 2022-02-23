@@ -3,6 +3,7 @@ todo
 [ ] 规范头文件, 补充 ifndef
 [ ] queue 优化
 [x] 设置选项 开启是否要 编译之后反编译转 asm
+[ ] 使用 cmake 进行构建
 
 - 内存管理:
   - malloc 实现

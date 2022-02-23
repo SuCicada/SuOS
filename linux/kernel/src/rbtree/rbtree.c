@@ -3,7 +3,7 @@
 //
 
 #include "rbtree.h"
-#include "arraylist.c"
+#include "memory/arraymem.c"
 // todo 之后可以做成泛型
 
 #define RB_Node_Red 1
@@ -24,7 +24,7 @@ struct RB_Node {
 
 struct RB_Tree {
 //    RB_Node arr[50];
-    ArrayList *nodes_mem; // RB_Node* arr[]
+    ArrayMemory *nodes_mem; // RB_Node* arr[]
     RB_Node *root;
     //    int capacity;
 };
@@ -60,14 +60,10 @@ struct RB_Tree {
 #define TRUE 1
 #define FALSE 0
 
-#ifdef NULL
-#define TEMP_NULL NULL
-#undef NULL
-#endif
-#define NULL ((void*)0)
+#define NULL ((void *)0)
 
 //void tree_init(RB_Tree *tree, RB_Node nodes[], int capacity) {
-void tree_init(RB_Tree *tree, ArrayList *nodes_mem, int capacity) {
+void tree_init(RB_Tree *tree, ArrayMemory *nodes_mem, int capacity) {
     tree->nodes_mem = nodes_mem;
     tree->root = NULL;
 //    tree->capacity = capacity;
@@ -137,7 +133,7 @@ RB_Node *node_get_uncle(RB_Node *node) {
 void tree_node_reset_parent(RB_Tree *tree, RB_Node *node, RB_Node *new_node) {
     RB_Node *parent = node->parent;
     if (parent == NULL) {
-        tree_set_root(tree,new_node);
+        tree_set_root(tree, new_node);
 
     } else {
         if (parent->left == node)
@@ -217,7 +213,7 @@ bool tree_auto_balance(RB_Tree *tree, RB_Node *current_node);
  */
 RB_Node *tree_add_node(RB_Tree *tree,
                        int value) {
-    RB_Node *node = (RB_Node *) arraylist_malloc(tree->nodes_mem);
+    RB_Node *node = (RB_Node *) arraymem_malloc(tree->nodes_mem);
     node->left = node->right = NULL;
     node->value = value;
     return node;
@@ -367,7 +363,7 @@ RB_Node *tree_add(RB_Tree *tree, int value) {
         // parent->children = new_node
         *res_parent_children_ptr = new_node;
     } else {
-        tree_set_root(tree,new_node);
+        tree_set_root(tree, new_node);
     }
     new_node->color = RB_Node_Red;
 
@@ -375,9 +371,3 @@ RB_Node *tree_add(RB_Tree *tree, int value) {
     return new_node;
 }
 
-
-#ifdef TEMP_NULL
-#undef NULL
-#define NULL TEMP_NULL
-#undef TEMP_NULL
-#endif

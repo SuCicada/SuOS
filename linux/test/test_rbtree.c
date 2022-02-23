@@ -49,9 +49,9 @@ int main() {
             12, 34, 21, 43221, 3123
     };
     RB_Node nodes[nodes_num];
-    ArrayList arraylist_data;
-    ArrayList *arraylist = &arraylist_data;
-    arraylist_init(arraylist, nodes, sizeof(RB_Node), nodes_num);
+    ArrayMemory arraylist_data;
+    ArrayMemory *arraylist = &arraylist_data;
+    arraymem_init(arraylist, nodes, sizeof(RB_Node), nodes_num);
     RB_Tree tree;
     RB_Tree *tree_ptr = &tree;
     tree_init(tree_ptr, arraylist, sizeof(nodes) / sizeof(RB_Node));

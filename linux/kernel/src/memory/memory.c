@@ -26,3 +26,18 @@ free(pointer):
 
 
  */
+
+struct Memory_Block {
+    int start, end;
+};
+#define Memory_Block struct Memory_Block
+
+
+
+void *mem_alloc(int size) {
+
+}
+
+void mem_free(void *ptr) {
+
+}
