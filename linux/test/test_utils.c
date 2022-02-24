@@ -5,14 +5,23 @@
 #include <unistd.h>
 #include <resolv.h>
 
+extern int sprintf(char *__restrict __s,
+                   const char *__restrict __format, ...);
+
+extern void *malloc(size_t __size);
+
 // #define sprintf sprintf
 char s[100];
+
 int main() {
     // sleep(1);
     int len;
     int a = -23;
-    unsigned int n = 0x7fffffff + a+1;
+    unsigned int n = 0x7fffffff + a + 1;
 
+    su_sprintf(s, "%x|", 2634848);
+    printf("%s|\n", s);
+    return 0;
     sprintf(s, "nihoa: %d - %1x %05d|", a, a, 6789);
     printf("%s|\n", s);
     su_sprintf(s, "nihoa: %d - %1x %05d|", a, a, 6789);
@@ -24,7 +33,7 @@ int main() {
     printf("%d\n", n);
     printf("%1x\n", n);
     unsigned int n1 = 0xffffffff;
-    printf("%d %u\n", n1,n1);
+    printf("%d %u\n", n1, n1);
     int *aa = malloc(12311232222323);
     return 0;
 

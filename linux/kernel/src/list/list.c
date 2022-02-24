@@ -3,21 +3,30 @@
 //
 
 #include "list.h"
-#include "../memory/arraymem.h"
+#include "arraymem.h"
 
 struct ListNode {
-    int value;
+    void* value_ptr;
     struct ListNode *next;
 };
 #define ListNode struct ListNode
 struct List {
     ArrayMemory *arraymem;
     ListNode *head;
-    int size;
+    ListNode *tail;
 };
 
 #define List struct List
 
-void list_init(ArrayMemory *arraymem) {
+void list_init(List *list, ArrayMemory *arraymem) {
+    list->arraymem = arraymem;
+}
+
+void list_add(List *list, void* value_ptr) {
+    ListNode *node = (ListNode *) arraymem_malloc(list->arraymem);
+    node->value_ptr = value_ptr;
+}
+
+void list_remove(List *list) {
 
 }

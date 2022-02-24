@@ -30,7 +30,7 @@ int su_sprintf(char *_stream, char *_format, ...) {
             int prefix_size = 0;
             char prefix_char = ' ';
             if (charIsNum(c2)) {
-                // eg: %03d , %-3d
+                /* eg: %03d , %-3d */
                 // __format++;
                 // char cc = *(__format + 1);
                 // if (charIsNum(c1)) {
@@ -39,7 +39,7 @@ int su_sprintf(char *_stream, char *_format, ...) {
                 _format += 2;
                 // __format++;
             } else if (charIsNum(c1)) {
-                // eg: %3d
+                /* eg: %3d */
                 prefix_size = char2Num(c1);
                 _format++;
             }
@@ -49,6 +49,7 @@ int su_sprintf(char *_stream, char *_format, ...) {
             switch (c) {
                 case 'x':
                     n = *(int *) arg;
+                    printf("xxxx %d\n",n);
                     arg += sizeof(int);
                     is_num_flag = 1;
                     match_num_len = int2hexstr(n, temp_str);

@@ -11,6 +11,8 @@ include_directories(linux/kernel/src/keyboard)
 include_directories(linux/kernel/src/mouse)
 include_directories(linux/kernel/src/queue)
 include_directories(linux/kernel/src/utils)
+include_directories(linux/kernel/src/list)
+include_directories(linux/kernel/src/memory)
 
 include_directories(linux/test)
 
@@ -48,9 +50,6 @@ add_executable(test
         linux/test/test_utils.c
         linux/test/test_rbtree.c
         linux/test/test_arraymem.c
-)
+        linux/test/test_memory.c)
 
 add_definitions(-D__ASSEMBLER__)
-
-
-#add_executable(test_utils linux/test/test_utils.c)

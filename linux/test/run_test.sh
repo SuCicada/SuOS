@@ -26,6 +26,7 @@ mkdir -p $temp_debug_dir
 
 cp $out $temp_debug
 
+#  -m32 \
 gcc \
   -g \
   "$f" -o $out && $out

@@ -81,7 +81,7 @@ kernel_obj_cmd = \
 		objcopy $(SECTIONS) -O binary $@.out $@ ;\
 
 ifeq ($(debug_build), true)
-kernel_cmd += \
+kernel_obj_cmd += \
 		objdump $(SECTIONS) -S $@.out > $@.asm ;\
 		objconv -fnasm $@.out $@2.asm ;\
 

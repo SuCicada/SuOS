@@ -9,12 +9,14 @@
   注意这里的函数名字为bootmain，因为在entry.S中设定的入口名字也是bootmain，两者要保持一致
  */
 char tmp_string[128];
+char aaaa[324];
 
 unsigned int memtest_sub(unsigned int start, unsigned int end);
 
 unsigned int memtest(unsigned int start, unsigned int end);
 
-_Noreturn void bootmain(void) {
+_Noreturn
+void bootmain(void) {
 
     struct BootInfo *binfo = (struct BootInfo *) ADR_BOOTINFO;
     init_gdtidt();
@@ -32,12 +34,15 @@ _Noreturn void bootmain(void) {
     init_screen();
 
     unsigned int memory_size;
-    memory_size = memtest(0x00400000, 0xffffffff) / (1024);
+    memory_size = memtest(0x00400000, 0xffffffff);
     su_sprintf(tmp_string, "memory_size = %d KB", memory_size);
     putfonts8_asc(0, 0, COL8_FFFFFF, tmp_string);
 
     su_sprintf(tmp_string, "DISPLAY_X_SIZE = %d ", DISPLAY_X_SIZE);
     putfonts8_asc(0, FONT_Y_SIZE, COL8_FFFFFF, tmp_string);
+
+    su_sprintf(tmp_string, "0x%d  0x%d", tmp_string, &aaaa[1]);
+    putfonts8_asc(0, FONT_Y_SIZE * 2, COL8_FFFFFF, tmp_string);
 
     init_mouse_cursor8();
 
@@ -82,7 +87,7 @@ _Noreturn void bootmain(void) {
 }
 
 
-#define EFLAGS_AC_BIT       0x00040000
+#define EFLAGS_AC_BIT        0x00040000
 #define CR0_CACHE_DISABLE    0x60000000
 
 

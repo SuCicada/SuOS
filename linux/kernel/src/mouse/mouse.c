@@ -26,45 +26,47 @@ void enable_mouse(void) {
     wait_KBC_sendready();
     io_out8(PORT_KEYDAT, MOUSECMD_ENABLE);
     mouse_dec.group_flag = -1;
-    return; /* 顺利的话，键盘控制器会返回ACK(0xfa) */
+    /* 顺利的话，键盘控制器会返回ACK(0xfa) */
 }
 
 void init_mouse_cursor8() {
-    char* mouse = mouse_cursor;
+    char *mouse = mouse_cursor;
     char outline = COL8_000000;
     char inside = COL8_FFFFFF;
     const static char mouse_cursor_img[16][16] = {
-        "**************..",
-        "*OOOOOOOOOOO*...",
-        "*OOOOOOOOOO*....",
-        "*OOOOOOOOO*.....",
-        "*OOOOOOOO*......",
-        "*OOOOOOO*.......",
-        "*OOOOOOO*.......",
-        "*OOOOOOOO*......",
-        "*OOOO**OOO*.....",
-        "*OOO*..*OOO*....",
-        "*OO*....*OOO*...",
-        "*O*......*OOO*..",
-        "**........*OOO*.",
-        "*..........*OOO*",
-        "............*OO*",
-        ".............***"
+            "**************..",
+            "*OOOOOOOOOOO*...",
+            "*OOOOOOOOOO*....",
+            "*OOOOOOOOO*.....",
+            "*OOOOOOOO*......",
+            "*OOOOOOO*.......",
+            "*OOOOOOO*.......",
+            "*OOOOOOOO*......",
+            "*OOOO**OOO*.....",
+            "*OOO*..*OOO*....",
+            "*OO*....*OOO*...",
+            "*O*......*OOO*..",
+            "**........*OOO*.",
+            "*..........*OOO*",
+            "............*OO*",
+            ".............***"
     };
     char m;
     for (int x = 0; x < 16; x++) {
         for (int y = 0; y < 16; y++) {
             char c = mouse_cursor_img[x][y];
             switch (c) {
-            case 'O':
-                m = inside;
-                break;
-            case '*':
-                m = outline;
-                break;
-            case '.':
-                m = -1;
-                break;
+                case 'O':
+                    m = inside;
+                    break;
+                case '*':
+                    m = outline;
+                    break;
+                case '.':
+                    m = -1;
+                    break;
+                default:
+                    break;
             }
             mouse[y * 16 + x] = m;
         }
@@ -80,7 +82,7 @@ void init_mouse_cursor8() {
 void mousebuf_deal() {
     io_cli();
     // for(int i=0;i<100000;i++);
-    Queue* buf_ptr = &mousebuf;
+    Queue *buf_ptr = &mousebuf;
     unsigned char data;
     if (!queue_empty(buf_ptr)) {
         data = queue_pop(buf_ptr);
@@ -90,12 +92,11 @@ void mousebuf_deal() {
                 mouse_dec.group_flag = 0;
             }
         }
-        if ((mouse_dec.group_flag == 0)) {
+        if (mouse_dec.group_flag == 0) {
             if ((data & 0xc8) == 0x08) {
                 mouse_dec.group[mouse_dec.group_flag++] = data;
             }
-        }
-        else {
+        } else {
             mouse_dec.group[mouse_dec.group_flag++] = data;
             // // int size = queue_size(buf_ptr);
             // su_sprintf(tmp_string, "size: %d %x", mouse_dec.group_flag, data& 0xc8);
@@ -116,10 +117,10 @@ void mousebuf_deal() {
         mouse_dec.x = mouse_dec.group[1];
         mouse_dec.y = mouse_dec.group[2];
         if ((m0 & 0x10) != 0) // 0b0001 0000
-            mouse_dec.x |= 0xffffff00;
+            mouse_dec.x |= (int) 0xffffff00;
         // mouse_dec.x =0;
         if ((m0 & 0x20) != 0) // 0b0010 0000
-            mouse_dec.y |= 0xffffff00;
+            mouse_dec.y |= (int) 0xffffff00;
         // mouse_dec.y =0;
 // #define abs(a) (a<0?-a:a)
         // if(abs(mouse_dec.x)>22)mouse_dec.x=0;
@@ -132,7 +133,7 @@ void mousebuf_deal() {
         mouse_dec.y = -mouse_dec.y;
 
         // int tmp[3] = { mouse_dec.btn, mouse_now_site_x, mouse_now_site_y };
-        int tmp[3] = { mouse_dec.btn,mouse_dec.x,mouse_dec.y };
+        int tmp[3] = {mouse_dec.btn, mouse_dec.x, mouse_dec.y};
 
         for (int i = 0; i < 3; i++) {
             int n = tmp[i];
