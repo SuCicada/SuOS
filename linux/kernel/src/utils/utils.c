@@ -49,7 +49,6 @@ int su_sprintf(char *_stream, char *_format, ...) {
             switch (c) {
                 case 'x':
                     n = *(int *) arg;
-                    printf("xxxx %d\n",n);
                     arg += sizeof(int);
                     is_num_flag = 1;
                     match_num_len = int2hexstr(n, temp_str);
@@ -126,7 +125,7 @@ int int2hexstr(int n, char *s) {
     }
     int res = int2basestr(n, s, 16);
     // 最高位设置为 1
-    s[0] = int2basechar(basechar2int(s[0]) + 8);
+//    s[0] = int2basechar(basechar2int(s[0]) + 8);
     return res;
 }
 
