@@ -41,7 +41,7 @@ void bootmain(void) {
     su_sprintf(tmp_string, "DISPLAY_X_SIZE = %d ", DISPLAY_X_SIZE);
     putfonts8_asc(0, FONT_Y_SIZE, COL8_FFFFFF, tmp_string);
 
-    su_sprintf(tmp_string, "0x%d  0x%d", tmp_string, &aaaa[1]);
+    su_sprintf(tmp_string, "0x%x  0x%x", tmp_string, &aaaa[1]);
     putfonts8_asc(0, FONT_Y_SIZE * 2, COL8_FFFFFF, tmp_string);
 
     init_mouse_cursor8();

@@ -1,10 +1,11 @@
 #!/bin/bash
 
-# shellcheck disable=SC2046,SC2164
+# shellcheck disable=SC2046,SC2164,SC2068
 
 cd $(dirname "$0")
-f=$1
-server=$2
+f=$1 && shift
+GCC=${GCC:-gcc}
+server=${SERVER:-false}
 out_file=test.out
 out_dir=../output/
 
@@ -24,13 +25,20 @@ mkdir -p $temp_debug_dir
 # -fno-stack-protector \
 #  -m32 \
 
-cp $out $temp_debug
-
 #  -m32 \
-gcc \
+echo "
+  GCC: $GCC
+"
+$GCC \
   -g \
-  "$f" -o $out && $out
-
+  -O0 \
+  $@ \
+  "$f" -o $out && {
+  echo "================"
+  $out
+}
+cp $out $temp_debug
+objdump -S $out_dir/test.out >$out_dir/test.asm
 
 if [ "$server" = "-s" ]; then
   #  tmp_debug_dir=/tmp/CLion/debug
