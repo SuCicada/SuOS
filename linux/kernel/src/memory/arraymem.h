@@ -25,20 +25,22 @@ data:  [0xfc][xx][xx]....
 struct ArrayMemory {
     void *array; // real_capacity = (type_size + 1) * capacity
     int type_size;
-    int capacity;
-    int real_capacity;
-    int end;
-    int size; // current how many allocated
+    unsigned int capacity;
+    unsigned int real_capacity;
+    unsigned int end;
+    unsigned int size; // current how many allocated
 };
 #define ArrayMemory struct ArrayMemory
 
 #define ArrayMemory_Node_Allocated_Flag ((char)0xfc)
 #define NULL ((void *)0)
 
-void arraymem_init(ArrayMemory *arraymem, void *array, int type_size, int capacity);
+void arraymem_init(ArrayMemory *arraymem, void *array, int type_size, unsigned int capacity);
 
 void *arraymem_malloc(ArrayMemory *arraymem);
 
 void arraymem_free(ArrayMemory *arraymem, void *data_ptr);
+
+unsigned int arraymem_get_real_capacity(ArrayMemory *arraymem);
 
 #endif //SUOS_ARRAYMEM_H

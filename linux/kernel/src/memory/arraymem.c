@@ -2,16 +2,20 @@
 // Created by SuCicada on 2/21/2022.
 //
 #include "arraymem.h"
+
 /** real space == (type_size + 1) * capacity
 */
-void arraymem_init(ArrayMemory *arraymem, void *array, int type_size, int capacity) {
+void arraymem_init(ArrayMemory *arraymem, void *array, int type_size, unsigned int capacity) {
     arraymem->array = array;
     arraymem->type_size = type_size;
     arraymem->capacity = capacity;
     arraymem->end = 0;
     arraymem->size = 0;
-    int real_full_space = (type_size + 1) * capacity;
-    arraymem->real_capacity = real_full_space;
+    arraymem->real_capacity = (type_size + 1) * capacity;
+}
+
+unsigned int arraymem_get_real_capacity(ArrayMemory *arraymem) {
+    return arraymem->real_capacity;
 }
 
 void *arraymem_malloc(ArrayMemory *arraymem) {
@@ -20,9 +24,10 @@ void *arraymem_malloc(ArrayMemory *arraymem) {
     }
 
     void *node = arraymem->array + arraymem->end;
-    int next_index = arraymem->end;
+    unsigned int next_index = arraymem->end;
 
     // 一直找, 找到空的空间
+
     while (*(char *) node == ArrayMemory_Node_Allocated_Flag) {
 
         next_index = next_index + 1 + arraymem->type_size;
