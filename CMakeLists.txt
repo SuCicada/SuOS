@@ -44,12 +44,12 @@ add_executable(SuOS
         linux/kernel/src/memory/arraymem.c
         linux/kernel/src/list/list.c
         linux/kernel/src/list/list.h
-        linux/kernel/src/memory/arraymem.h)
+        linux/kernel/src/memory/arraymem.h linux/kernel/src/typedef.h)
 
 add_executable(test
         linux/test/test_utils.c
         linux/test/test_rbtree.c
         linux/test/test_arraymem.c
-        linux/test/test_memory.c)
+        linux/test/test_memory.c linux/test/utils_test.c)
 
 add_definitions(-D__ASSEMBLER__)

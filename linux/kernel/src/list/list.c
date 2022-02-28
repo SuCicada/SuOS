@@ -62,18 +62,30 @@ ListNode *list_new_node(List *list, void *value_ptr) {
 }
 
 void list_add_after_node(List *list, ListNode *pre, void *value_ptr) {
+    // need add
     ListNode *node = list_new_node(list, value_ptr);
     if (pre == NULL) {
         list->head = node;
         return;
     }
 
+    node->next = pre->next;
     pre->next = node;
     if (pre == list->tail) {
         list->tail = node;
     }
 }
 
-void list_remove(List *list) {
+void list_delete_after_node(List *list, ListNode *pre) {
+    ListNode *need_delete;
+    if (pre == NULL) {
+        // remove head
+        need_delete = list->head;
+        list->head = need_delete->next;
+    } else {
+        need_delete = pre->next;
+        pre->next = need_delete->next;
+    }
+    arraymem_free(list->arraymem, need_delete);
 
 }

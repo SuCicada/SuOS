@@ -1,7 +1,7 @@
 //
 // Created by SuCicada on 2/9/2022.
 //
-
+#include "typedef.h"
 #include "rbtree.h"
 #include "memory/arraymem.c"
 // todo 之后可以做成泛型
@@ -55,10 +55,6 @@ struct RB_Tree {
 #define RB_Node_Root 0
 #define RB_Node_Left 1
 #define RB_Node_Right 2
-
-#define bool int
-#define TRUE 1
-#define FALSE 0
 
 #define NULL ((void *)0)
 
