@@ -42,10 +42,10 @@ void *test_mem_free(void *p) {
 
 int main() {
 //    mem_init_config(0x00400000, 1024 * 1024 * 10);
-//    printf("%d\n", sizeof(MemoryBlock));
     int memory_size = 1024 * 1024 * 10;
     void *start_address = malloc(memory_size);
     mem_init_config((unsigned int) start_address, memory_size);
+    printf("%d\n", sizeof(MemoryBlock));
 
     void *p;
     // test mem_alloc

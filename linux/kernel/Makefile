@@ -31,7 +31,8 @@ ENTRY_OBJ = entry.o
 CODE_OBJ = main.o asmfunc.o asmfunc0.o utils.o \
 	dsctbl.o int.o color.o \
 	mouse.o keyboard.o \
-	queue.o
+	queue.o list.o \
+	memory.o
 
 ENTRY_OBJ_FILES :=  $(patsubst %, $(OUTPUT)/%, $(ENTRY_OBJ))
 CODE_OBJ_FILES  := $(patsubst %, $(OUTPUT)/%, $(CODE_OBJ))
@@ -123,10 +124,10 @@ endif
 # 	objdump -S $@ > $(patsubst %.o, %.asm, $@)
 # 	objconv -fnasm $@ $(patsubst %.o, %2.asm, $@)
 
-$(OUTPUT)/%.o: %.c
-	$(gcc_cmd)
-$(OUTPUT)/%.o: %.S
-	$(gcc_cmd)
+#$(OUTPUT)/%.o: %.c
+#	$(gcc_cmd)
+#$(OUTPUT)/%.o: %.S
+#	$(gcc_cmd)
 
 $(OUTPUT)/%.o: $(src_dir)/%.c
 	$(gcc_cmd)

@@ -3,22 +3,7 @@
 //
 
 #include "list.h"
-#include "arraymem.h"
 
-struct ListNode {
-    void *value_ptr; // 虽然是指针，但因为我们要适配泛型，所以这里最后指向的是一段真实空间
-    struct ListNode *next;
-    // ... value data ... (真实空间中, 这后面就存着值数据了)
-};
-#define ListNode struct ListNode
-struct List {
-    ArrayMemory *arraymem;
-    int type_size;
-    ListNode *head;
-    ListNode *tail;
-};
-
-#define List struct List
 
 void *list_node_get_value(ListNode *node) {
     return node->value_ptr;
@@ -87,5 +72,4 @@ void list_delete_after_node(List *list, ListNode *pre) {
         pre->next = need_delete->next;
     }
     arraymem_free(list->arraymem, need_delete);
-
 }

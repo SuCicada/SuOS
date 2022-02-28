@@ -1,63 +1,85 @@
 //
 // Created by SuCicada on 2/8/2022.
 //
-#include "typedef.h"
 #include "memory.h"
-#include "list.c" // todo
-
-/**
-1. Best Fit
-2. 排序
-3.
-
-0x00400000 开始分配
-
-## mft block (map free table block)
-    MemoryBlock
-
-## data block:
-
- one data block in memory:
- [ ][ ][ ][ ][.........]
-  ^        ^
-  | 4byte  |
- [ data.size][..data...]
-    ^         ^
-    |         |
- data_flag   *ptr
-
- */
-
-/** 8 byte
- 注意: 不同于 data block
- */
-struct MemoryBlock {
-    unsigned int start_address; // data address, exclude flag
-    unsigned int size; // data size, exclude flag size
-};
-#define MemoryBlock struct MemoryBlock
-// 内存管理表能管理到的内存空闲块的数量
-#define map_table_frees 4096
-
-/** 12 byte  */
-struct MEMORY_MAP_TABLE {
-//    int map_table_size;
-    unsigned int start_address;
-    unsigned int memory_size; // equals to end_address
-    unsigned int memory_used;
-    List *memory_free_table; // [MemoryBlock] table of free space
-};
-#define MEMORY_MAP_TABLE struct MEMORY_MAP_TABLE
-
-MEMORY_MAP_TABLE memory_map_table;
-List memory_free_table_list;
-ArrayMemory arraymem;
-
-
-#pragma clang diagnostic push
+#include "header.h"
+#include "arraymem.c"
+//#pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wint-to-pointer-cast"
-#define mem_size_t unsigned int
+#pragma clang diagnostic ignored "-Wvoid-pointer-to-int-cast"
 
+unsigned int memtest(unsigned int start, unsigned int end) {
+    char flg486 = 0;
+    unsigned int eflg, cr0, i;
+
+    /* 确认CPU是386还是486以上的 */
+    eflg = io_load_eflags();
+    eflg |= EFLAGS_AC_BIT; /* AC-bit = 1 */
+    io_store_eflags(eflg);
+    eflg = io_load_eflags();
+    if ((eflg & EFLAGS_AC_BIT) != 0) {
+        /* 如果是386，即使设定AC=1，AC的值还会自动回到0 */
+        flg486 = 1;
+    }
+
+    eflg &= ~EFLAGS_AC_BIT; /* AC-bit = 0 */
+    io_store_eflags(eflg);
+
+    if (flg486 != 0) {
+        cr0 = load_cr0();
+        cr0 |= CR0_CACHE_DISABLE; /* 禁止缓存 */
+        store_cr0(cr0);
+    }
+
+    i = memtest_sub(start, end);
+
+    if (flg486 != 0) {
+        cr0 = load_cr0();
+        cr0 &= ~CR0_CACHE_DISABLE; /* 允许缓存 */
+        store_cr0(cr0);
+    }
+
+    return i;
+}
+
+unsigned int memtest_sub(unsigned int start, unsigned int end) {
+    unsigned int i, *p, old;
+
+    const unsigned int pat0 = 0xaa55aa55;
+    const unsigned int pat1 = 0x55aa55aa;
+    int ii = 0;
+    for (i = start; i <= end; i += 0x1000) {  //4KBずつチェック
+        p = (unsigned int *) (i + 0xffc); //4KBの下位4byteを見る
+        //戻せるように今の値を覚えておく
+        old = *p;
+        //テスト用のデータを入れてbit反転
+        *p = pat0;
+        *p ^= 0xffffffff;
+        //正常に反転できていなければ値をもどして抜ける
+        if (*p != pat1) {
+            *p = old;
+            break;
+        }
+        //再反転して同じように値をチェックする
+        *p ^= 0xffffffff;
+        if (*p != pat0) {
+            *p = old;
+            break;
+        }
+
+
+        // to show progress info
+/*        if (ii++ % 10000 == 0) {
+            boxfill8_s(0, 0, 25 * FONT_Y_SIZE, FONT_Y_SIZE, BACK_COLOR);
+            su_sprintf(tmp_string, "memory_check  %u/%u ",
+                       (i - start) / 0x100, (end - start) / 0x100);
+            putfonts8_asc(0, 0, COL8_FFFFFF, tmp_string);
+        }
+        */
+    }
+//    boxfill8_s(0, 0, 25 * FONT_Y_SIZE, FONT_Y_SIZE, BACK_COLOR);
+    return i;
+}
 
 void mem_init_config(unsigned int start_address, unsigned int memory_size) {
 
@@ -83,6 +105,9 @@ void mem_init_config(unsigned int start_address, unsigned int memory_size) {
 //    printf("init over %x\n", full_free_block);
 }
 
+unsigned int mem_get_used_size() {
+    return memory_map_table.memory_used;
+}
 
 void *mem_alloc(unsigned int data_size) {
     // 多个4byte用来放内存块尺寸
@@ -130,10 +155,6 @@ void *mem_alloc(unsigned int data_size) {
     memory_map_table.memory_used += block_size;
     return res;
 }
-
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wvoid-pointer-to-int-cast"
 
 void mem_free(void *ptr) {
     int flag_size = sizeof(mem_size_t);
@@ -210,6 +231,4 @@ void mem_free(void *ptr) {
     memory_map_table.memory_used -= block_size;
 }
 
-#pragma clang diagnostic pop
-
-#pragma clang diagnostic pop
+//#pragma clang diagnostic pop
