@@ -21,7 +21,8 @@ CFLAGS += -m32 -march=i486
 CFLAGS += -std=c99  -fno-stack-protector -g
 
 
-LDFLAGS = -m elf_i386  -nostdlib -nostdinc
+LDFLAGS = -m elf_i386  -nostdlib
+#LDFLAGS +=-nostdinc
 
 
 SOURCE_FILES := $(filter-out $(wildcard output/*),  $(wildcard * src/* src/*/* ))
@@ -42,6 +43,8 @@ src_dir = src
 .PHONY: clean build kernel success
 
 kernel = $(OUTPUT)/kernel
+
+objconv = ../bin/objconv
 
 all: build
 
@@ -84,7 +87,7 @@ kernel_obj_cmd = \
 ifeq ($(debug_build), true)
 kernel_obj_cmd += \
 		objdump $(SECTIONS) -S $@.out > $@.asm ;\
-		objconv -fnasm $@.out $@2.asm ;\
+		$(objconv) -fnasm $@.out $@2.asm ;\
 
 endif
 
@@ -105,12 +108,16 @@ $(OUTPUT)/asmfunc0.o: src/asmfunc/asmfunc.asm
 	nasm -g -f elf32 -o $@ $<
 
 gcc_cmd = \
-	gcc $(CFLAGS) -c -o $@ $< ;\
+	if [ `echo $^ | awk '{print NF}'` -gt 1 ]; then \
+		gcc $(CFLAGS) -c -o $@ $(<D)/$(*F).c ;\
+	else \
+		gcc $(CFLAGS) -c -o $@ $< ;\
+	fi	\
 
 ifeq ($(debug_build), true)
 gcc_cmd += \
 	objdump -S $@ > $(patsubst %.o, %.asm, $@) ;\
-	objconv -fnasm $@ $(patsubst %.o, %2.asm, $@) ;\
+	$(objconv) -fnasm $@ $(patsubst %.o, %2.asm, $@) ;\
 
 endif
 
@@ -139,6 +146,9 @@ $(OUTPUT)/%.o: $(src_dir)/%/*.c
 
 $(OUTPUT)/%.o: $(src_dir)/%/*.S
 	$(gcc_cmd)
+
+#$(OUTPUT)/memory.o: $(src_dir)/$(%D)/$(%F).c
+#	$(gcc_cmd)
 
 # ==== hankaku ======
 convHankakuTxt = $(OUTPUT)/convHankakuTxt

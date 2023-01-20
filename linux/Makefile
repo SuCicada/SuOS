@@ -22,7 +22,7 @@ MEMORY = 32M # 32768K
 QEMU = qemu-system-i386
 QEMU += -m $(MEMORY)
 
-.PHONY: list clean kernel
+.PHONY: list clean kernel info
 all: build
 build: kernel $(OS_BIN) $(IMG) # copy
 	@echo "=========================="
@@ -43,6 +43,8 @@ debug:
 	$(MAKE) build debug_build=true
 #	$(QEMU) -drive file=$(IMG),if=floppy -gdb tcp:0.0.0.0:1234 -S
 	$(QEMU) -fda $(IMG) -s -S
+info:
+	@echo IMG:	$(IMG)
 
 copy: $(IMG) $(KERNEL)
 # 使用copy方式的话, kernel 地址为 0xc400

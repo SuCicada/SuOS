@@ -1,3 +1,14 @@
+```bash
+apt install nasm
+apt install gcc-multilib
+
+
+make debug_build=true -B
+```
+
+https://www.gnu.org/software/make/manual/html_node/Automatic-Variables.html
+
+
 <pre>
 floppy.nas 已经没有用了
 目前来说 screen.c 也没用

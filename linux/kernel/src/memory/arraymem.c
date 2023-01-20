@@ -1,6 +1,9 @@
 //
 // Created by SuCicada on 2/21/2022.
 //
+#ifndef SUOS_ARRAYMEM_C
+#define SUOS_ARRAYMEM_C
+
 #include "arraymem.h"
 
 /** real space == (type_size + 1) * capacity
@@ -49,3 +52,5 @@ void arraymem_free(ArrayMemory *arraymem, void *data_ptr) {
     *(char *) (data_ptr - 1) = 0;
     arraymem->size--;
 }
+
+#endif //SUOS_ARRAYMEM_C

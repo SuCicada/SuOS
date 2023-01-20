@@ -8,10 +8,12 @@ char mouse_screen_origin[16 * 16];
 
 Queue mousebuf;
 
-char tmp_string[128];
+//char tmp_string[128];
 
 unsigned char mousebuf_mem[32]; // 为了能初始化固定的内存空间
 char mouse_cursor[16 * 16];
+
+struct MOUSE_DEC mouse_dec;
 
 void mousebuf_init() {
     int size = sizeof(mousebuf_mem) / sizeof(unsigned char);

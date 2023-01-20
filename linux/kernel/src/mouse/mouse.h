@@ -1,3 +1,6 @@
+#ifndef MOUSE_H
+#define MOUSE_H
+
 #define KEYCMD_SENDTO_MOUSE		0xd4
 #define MOUSECMD_ENABLE			0xf4
 
@@ -8,10 +11,11 @@ struct MOUSE_DEC {
 	int x, y, btn;
 };
 
-struct MOUSE_DEC mouse_dec;
 
 void mousebuf_init();
 void mousebuf_deal();
 
 void enable_mouse();
 void init_mouse_cursor8();
+
+#endif

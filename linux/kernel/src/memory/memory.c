@@ -8,6 +8,10 @@
 #pragma clang diagnostic ignored "-Wint-to-pointer-cast"
 #pragma clang diagnostic ignored "-Wvoid-pointer-to-int-cast"
 
+MEMORY_MAP_TABLE memory_map_table;
+List memory_free_table_list;
+ArrayMemory arraymem;
+
 unsigned int memtest(unsigned int start, unsigned int end) {
     char flg486 = 0;
     unsigned int eflg, cr0, i;

@@ -22,7 +22,7 @@ void list_init(List *list, ArrayMemory *arraymem, int value_type_size) {
 }
 
 /** copy s2 to s1 */
-void memcpy(void *s1, const void *s2, unsigned int n) {
+void my_memcpy(void *s1, const void *s2, unsigned int n) {
     for (int i = 0; i < n; i++) {
         *((char *) s1++) = *((char *) s2++);
     }
@@ -39,7 +39,7 @@ ListNode *list_new_node(List *list, void *value_ptr) {
     new_node->value_ptr = value_data;
     new_node->next = NULL;
     //    printf("%x %x %d \n", new_node->value_ptr, value_ptr, list->type_size);
-    memcpy(value_data, value_ptr, list->type_size);
+    my_memcpy(value_data, value_ptr, list->type_size);
 //    printf("?????? %p %p\n", new_node, new_node->next);
 //    new_node->value_ptr = value_ptr;
 

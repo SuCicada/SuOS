@@ -12,9 +12,6 @@
 //char tmp_string[128];
 char aaaa[324];
 
-unsigned int memtest_sub(unsigned int start, unsigned int end);
-
-unsigned int memtest(unsigned int start, unsigned int end);
 
 _Noreturn
 void bootmain(void) {

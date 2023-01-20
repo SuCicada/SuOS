@@ -7,7 +7,7 @@
 
 #include "list.h"
 #include "typedef.h"
-
+#include "arraymem.h"
 
 /**
 1. Best Fit
@@ -54,9 +54,9 @@ struct MEMORY_MAP_TABLE {
 };
 #define MEMORY_MAP_TABLE struct MEMORY_MAP_TABLE
 
-MEMORY_MAP_TABLE memory_map_table;
-List memory_free_table_list;
-ArrayMemory arraymem;
+extern MEMORY_MAP_TABLE memory_map_table;
+extern List memory_free_table_list;
+extern ArrayMemory arraymem;
 
 // ==================== memory check =======================
 #define EFLAGS_AC_BIT        0x00040000
@@ -78,5 +78,8 @@ void mem_free(void *ptr);
 
 #define mem_size_t unsigned int
 
+//unsigned int memtest_sub(unsigned int start, unsigned int end);
+//
+//unsigned int memtest(unsigned int start, unsigned int end);
 
 #endif //SUOS_MEMORY_H
