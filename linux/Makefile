@@ -22,9 +22,20 @@ MEMORY = 32M # 32768K
 QEMU = qemu-system-i386
 QEMU += -m $(MEMORY)
 
+
+MACHINE := $(shell uname -m)
+ifeq ($(MACHINE),x86_64)
+else ifeq ($(MACHINE),arm64)
+	MAKE := docker exec -w /root/host/SuOS/linux tilck $(MAKE)
+endif
+
+
+
 .PHONY: list clean kernel info
-all: build
-build: kernel $(OS_BIN) $(IMG) # copy
+all:
+	@$(MAKE) build
+
+build: info $(IMG)  # copy
 	@echo "=========================="
 	@echo "|| build su_img success ||"
 	@echo "=========================="
@@ -32,10 +43,15 @@ build: kernel $(OS_BIN) $(IMG) # copy
 run: build
 	$(QEMU) -drive file=$(IMG),if=floppy
 
+run-only:
+	$(QEMU) -drive file=$(IMG),if=floppy
+
 #START_ADDRESS = 0xc400
 START_ADDRESS = 0x008200
 
-kernel:
+kernel: $(KERNEL)
+
+$(KERNEL):
 	$(MAKE) -C kernel build -j \
 		debug_build=$(debug_build) START_ADDRESS=$(START_ADDRESS)
 
@@ -45,6 +61,8 @@ debug:
 	$(QEMU) -fda $(IMG) -s -S
 info:
 	@echo IMG:	$(IMG)
+	@echo MACHINE:	$(MACHINE)
+	@echo MAKE: $(MAKE)
 
 copy: $(IMG) $(KERNEL)
 # 使用copy方式的话, kernel 地址为 0xc400
