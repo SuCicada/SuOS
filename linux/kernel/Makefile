@@ -18,7 +18,8 @@ CFLAGS += -Wall -Wno-format -Wno-unused
 # debug info
 CFLAGS += -gstabs
 CFLAGS += -m32 -march=i486
-CFLAGS += -std=c99  -fno-stack-protector -g
+CFLAGS += -std=c99
+CFLAGS += -fno-stack-protector -g
 
 
 LDFLAGS = -m elf_i386  -nostdlib
@@ -29,11 +30,17 @@ SOURCE_FILES := $(filter-out $(wildcard output/*),  $(wildcard * src/* src/*/* )
 
 # 注意，顺序很重要，entry 要在第一个
 ENTRY_OBJ = entry.o
-CODE_OBJ = main.o asmfunc.o asmfunc0.o utils.o \
-	dsctbl.o int.o color.o \
-	mouse.o keyboard.o \
-	queue.o list.o \
-	memory.o
+CODE_OBJ = main.o asmfunc.o asmfunc0.o \
+	color.o \
+	keyboard.o \
+	list.o \
+	memory.o \
+	mouse.o \
+	queue.o \
+	serial.o \
+	utils.o \
+	dsctbl.o \
+	int.o \
 
 ENTRY_OBJ_FILES :=  $(patsubst %, $(OUTPUT)/%, $(ENTRY_OBJ))
 CODE_OBJ_FILES  := $(patsubst %, $(OUTPUT)/%, $(CODE_OBJ))
@@ -75,7 +82,7 @@ build: info \
 # .ONESHELL:
 SECTIONS = -j .text -j .data -j .rodata
 # SECTIONS =
-$(kernel):  $(OUTPUT)/entry $(OUTPUT)/code
+$(kernel): $(OUTPUT)/entry $(OUTPUT)/code
 # -Ttext 代表, 所有代码起始地址为 0xc400 ,即 entry 开始的地址
 # ld $(LDFLAGS) -N -e start -Ttext $(addr) -o $@.out $^
 	cat $^ > $@
@@ -95,6 +102,7 @@ $(OUTPUT)/entry: $(ENTRY_OBJ_FILES)
 	ld $(LDFLAGS) -N -e entry -Ttext $(START_ADDRESS) -o $@.out $^
 	$(kernel_obj_cmd)
 
+code: $(OUTPUT) $(OUTPUT)/code
 $(OUTPUT)/code: $(CODE_OBJ_FILES)
 	ld $(LDFLAGS) -N -e bootmain -Ttext 0x00280000 -o $@.out $^
 	$(kernel_obj_cmd)
@@ -112,7 +120,7 @@ gcc_cmd = \
 		gcc $(CFLAGS) -c -o $@ $(<D)/$(*F).c ;\
 	else \
 		gcc $(CFLAGS) -c -o $@ $< ;\
-	fi	\
+	fi;	\
 
 ifeq ($(debug_build), true)
 gcc_cmd += \
@@ -187,3 +195,12 @@ clean:
 # screen.o: screen.c
 # 	gcc $(CFLAGS) -c -o $@ $<
 # 	# mv $@ $(OUTPUT)
+MACHINE := $(shell uname -m)
+ifeq ($(MACHINE),x86_64)
+	GDB = gdb
+else ifeq ($(MACHINE),arm64)
+	GDB = x86_64-elf-gdb
+endif
+gdb:
+	$(GDB) -x gdb.src
+

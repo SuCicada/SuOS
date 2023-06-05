@@ -1,14 +1,14 @@
 todo
-[ ] 检测环境中 objconv, 自动安装
-[ ] 规范头文件, 补充 ifndef
-[ ] queue 优化
-[x] 设置选项 开启是否要 编译之后反编译转 asm
-[ ] 使用 cmake 进行构建
-[ ] memory 的设计文档
+- [ ] 检测环境中 objconv, 自动安装
+- [ ] 规范头文件, 补充 ifndef
+- [ ] queue 优化
+- [x] 设置选项 开启是否要 编译之后反编译转 asm
+- [ ] 使用 cmake 进行构建
+- [ ] memory 的设计文档
 
-- 内存管理:
-  - malloc 实现
-  - 边界标记法 ptmalloc
+- [ ] 内存管理:
+  - [ ] malloc 实现
+  - [ ] 边界标记法 ptmalloc
 
 https://github.com/pollenjp/myHariboteOS
 
@@ -46,3 +46,4 @@ https://segmentfault.com/a/1190000021366480
 
 ## knowledge
 
+https://hackmd.io/@ht5XugipSwSVRPoFySpn6Q/B13I1hHRH

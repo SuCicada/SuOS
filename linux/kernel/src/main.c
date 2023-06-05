@@ -4,7 +4,7 @@
 #include "mouse.h"
 #include "keyboard.h"
 #include "memory.h"
-
+#include "serial.h"
 /*
   0xa0000 -> 0xaffff is screen memery
   注意这里的函数名字为bootmain，因为在entry.S中设定的入口名字也是bootmain，两者要保持一致
@@ -12,9 +12,11 @@
 //char tmp_string[128];
 char aaaa[324];
 
-
+/* 注意, bootmain 函数前面不能放任何函数 */
 _Noreturn
 void bootmain(void) {
+    init_serial();
+    write_serial_string("hello world\n");
 
     struct BootInfo *binfo = (struct BootInfo *) ADR_BOOTINFO;
     init_gdtidt();
@@ -92,9 +94,4 @@ void bootmain(void) {
     }
     // io_hlt();
 }
-
-
-
-
-
 

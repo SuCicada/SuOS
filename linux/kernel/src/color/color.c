@@ -1,5 +1,5 @@
 #include "hankaku.h"
-#include "header.h"
+#include "../header.h"
 #include "color.h"
 
 int DISPLAY_X_SIZE;

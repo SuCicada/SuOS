@@ -5,7 +5,7 @@ extern void io_sti();
 extern int io_load_eflags();
 extern void io_store_eflags(unsigned int flag);
 extern void io_out8(int port, int data);
-extern char io_in8(int port);
+extern unsigned char io_in8(int port);
 
 extern void load_idtr(int limit, int addr);
 extern void load_gdtr(int limit, int addr);

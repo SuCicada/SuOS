@@ -11,4 +11,4 @@ unzip source.zip -d source
 cd source
 #./build.sh
 g++ -o objconv -O2 *.cpp --trace
-mv objconv ../../..//bin/
+mv objconv ../../../bin/

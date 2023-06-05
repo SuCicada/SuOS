@@ -120,3 +120,4 @@ asm_inthandler27:
 	POP		DS
 	POP		ES
 	IRETD			; 中断返回
+ 

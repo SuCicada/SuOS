@@ -20,28 +20,43 @@ debug_build = false
 # QEMU = qemu-system-x86_64
 MEMORY = 32M # 32768K
 QEMU = qemu-system-i386
-QEMU += -m $(MEMORY)
 
-
-MACHINE := $(shell uname -m)
-ifeq ($(MACHINE),x86_64)
-else ifeq ($(MACHINE),arm64)
-	MAKE := docker exec -w /root/host/SuOS/linux tilck $(MAKE)
+ifeq ($(SYSTEM), Darwin)
+	QEMU = osascript move.scpt & $(QEMU)
 endif
 
 
+QEMU += -m $(MEMORY)
 
-.PHONY: list clean kernel info
-all:
-	@$(MAKE) build
+DOCKER = docker exec -w /root/host/SuOS/linux tilck
+DOCKER_IT = docker exec -it -w /root/host/SuOS/linux tilck
+MACHINE := $(shell uname -m)
+SYSTEM  := $(shell uname -s)
+ifeq ($(MACHINE),x86_64)
+	GDB = gdb
+else ifeq ($(MACHINE),arm64)
+	MAKE := $(DOCKER) $(MAKE)
+	GDB = x86_64-elf-gdb
+endif
 
-build: info $(IMG)  # copy
+test:
+	echo -$(MAKEFLAGS)
+
+.PHONY: list clean kernel info test
+all: build
+
+build:
+	@$(MAKE) _build
+_build: info img  # copy
 	@echo "=========================="
 	@echo "|| build su_img success ||"
 	@echo "=========================="
 
-run: build
-	$(QEMU) -drive file=$(IMG),if=floppy
+run: all
+ifeq ($(SYSTEM), Darwin)
+	osascript move.scpt &
+endif
+	$(QEMU) -drive file=$(IMG),if=floppy -serial stdio
 
 run-only:
 	$(QEMU) -drive file=$(IMG),if=floppy
@@ -49,16 +64,17 @@ run-only:
 #START_ADDRESS = 0xc400
 START_ADDRESS = 0x008200
 
-kernel: $(KERNEL)
-
-$(KERNEL):
+#kernel: $(KERNEL)
+#$(KERNEL):
+kernel:
 	$(MAKE) -C kernel build -j \
 		debug_build=$(debug_build) START_ADDRESS=$(START_ADDRESS)
 
 debug:
 	$(MAKE) build debug_build=true
-#	$(QEMU) -drive file=$(IMG),if=floppy -gdb tcp:0.0.0.0:1234 -S
-	$(QEMU) -fda $(IMG) -s -S
+	$(QEMU) -drive file=$(IMG),if=floppy -gdb tcp:0.0.0.0:1234 -S
+	#$(QEMU) -fda $(IMG) -s -S
+
 info:
 	@echo IMG:	$(IMG)
 	@echo MACHINE:	$(MACHINE)
@@ -78,11 +94,11 @@ mount: $(IMG)
 umount:
 	$(UMOUNT) $(TMP_DIR)
 
-$(OS_BIN) : suos.asm Makefile output
+$(OS_BIN): suos.asm Makefile output
 	nasm -g -o $@ -l $(OUT_LST) $<
 # nasm -o $(OUT_FLOPPY) -l $(OUTPUT)/floppy.lst floppy.nas
 
-img: $(IMG)
+img: kernel $(IMG)
 $(IMG): $(OS_BIN) $(KERNEL)
 # 制作一个 1.44MB 的文件用于作为软盘文件
 	$(EDIMG) $^ $@
@@ -96,3 +112,6 @@ list:
 clean:
 	rm -fr $(OUTPUT)
 	$(MAKE) -C kernel clean
+
+exec_docker:
+	$(DOCKER_IT) bash
