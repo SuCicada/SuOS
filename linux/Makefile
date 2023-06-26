@@ -28,8 +28,9 @@ endif
 
 QEMU += -m $(MEMORY)
 
-DOCKER = docker exec -w /root/host/SuOS/linux tilck
-DOCKER_IT = docker exec -it -w /root/host/SuOS/linux tilck
+CONTAINER_NAME = tilck
+DOCKER = docker exec -w /root/host/SuOS/linux $(CONTAINER_NAME)
+DOCKER_IT = docker exec -it -w /root/host/SuOS/linux $(CONTAINER_NAME)
 MACHINE := $(shell uname -m)
 SYSTEM  := $(shell uname -s)
 ifeq ($(MACHINE),x86_64)
@@ -52,14 +53,16 @@ _build: info img  # copy
 	@echo "|| build su_img success ||"
 	@echo "=========================="
 
+QEMU_RUN := $(QEMU) -drive file=$(IMG),if=floppy -serial stdio
+
 run: all
 ifeq ($(SYSTEM), Darwin)
-	osascript move.scpt &
+	(sleep 1 && osascript move.scpt) &
 endif
-	$(QEMU) -drive file=$(IMG),if=floppy -serial stdio
+	$(QEMU_RUN)
 
 run-only:
-	$(QEMU) -drive file=$(IMG),if=floppy
+	$(QEMU_RUN)
 
 #START_ADDRESS = 0xc400
 START_ADDRESS = 0x008200
@@ -72,13 +75,15 @@ kernel:
 
 debug:
 	$(MAKE) build debug_build=true
-	$(QEMU) -drive file=$(IMG),if=floppy -gdb tcp:0.0.0.0:1234 -S
-	#$(QEMU) -fda $(IMG) -s -S
+	$(QEMU_RUN) -s -S
+	#$(QEMU) -drive file=$(IMG),if=floppy -gdb tcp:0.0.0.0:1234 -S
+#	$(QEMU) -fda $(IMG) -s -S
 
 info:
 	@echo IMG:	$(IMG)
 	@echo MACHINE:	$(MACHINE)
 	@echo MAKE: $(MAKE)
+	@make -C kernel info
 
 copy: $(IMG) $(KERNEL)
 # 使用copy方式的话, kernel 地址为 0xc400
@@ -113,5 +118,21 @@ clean:
 	rm -fr $(OUTPUT)
 	$(MAKE) -C kernel clean
 
-exec_docker:
+docker_exec:
 	$(DOCKER_IT) bash
+docker_start:
+	docker start $(CONTAINER_NAME)
+	$(DOCKER) /etc/init.d/ssh start
+docker_backup:
+	docker commit $(CONTAINER_NAME) sucicada/su-linux-dev
+docker_push: docker_backup
+	docker push sucicada/su-linux-dev
+docker_new:
+	docker run -tid \
+		--cap-add=SYS_PTRACE \
+		--security-opt seccomp=unconfined \
+		--platform linux/amd64 \
+		-p 2222:22 \
+		-p 21234:1234 \
+		-v /Users/peng/PROGRAM/Docker:/root/host\
+		--name tilck -d sucicada/su-linux-dev

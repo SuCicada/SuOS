@@ -1,6 +1,7 @@
 #ifndef JOS_INC_MMU_H
 #define JOS_INC_MMU_H
 
+#define __ASSEMBLER__
 /*
  * This file contains definitions for the x86 memory management unit (MMU),
  * including paging- and segmentation-related data structures and constants,

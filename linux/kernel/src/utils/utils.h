@@ -1,3 +1,6 @@
+#ifndef SUOS_utils_H
+#define SUOS_utils_H
+
 int int2str(int n, char *s);
 
 int uint2str(unsigned int n, char *s);
@@ -7,3 +10,5 @@ int uint2str(unsigned int n, char *s);
 
 int su_sprintf(char *_stream, char *_format, ...);
 
+
+#endif //SUOS_utils_H

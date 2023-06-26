@@ -7,7 +7,7 @@
 struct BootInfo {
 	char cyls, leds, vmode, reserve; // 1 byte * 4 ;
 	short scrnx, scrny;				 // 2 byte * 2 ; x_size, y_size
-	char* vram;						 // 4 byte
+    unsigned char* vram;						 // 4 byte
 };
 
 // 记录 boot 信息的地址

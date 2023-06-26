@@ -37,13 +37,13 @@ void keybuf_deal() {
         unsigned char data = queue_pop(&keybuf.queue);
 
         su_sprintf(tmp_string, "0x%x", data);
-        boxfill8(0, 16, 4 * FONT_X_SIZE, 31, COL8_000000);
-        putfonts8_asc(0, 16, COL8_FFFFFF, tmp_string);
+        boxfill8_v1(0, 16, 4 * FONT_X_SIZE, 31, COL8_000000);
+        putfonts8_asc_v1(0, 16, COL8_FFFFFF, tmp_string);
 
         int size = queue_size(&keybuf.queue);
         su_sprintf(tmp_string, "size: %d", size);
-        boxfill8(0, FONT_Y_SIZE * 5, 10 * FONT_X_SIZE, FONT_Y_SIZE * (5 + 1), COL8_000000);
-        putfonts8_asc(0, FONT_Y_SIZE * 5, COL8_FFFFFF, tmp_string);
+        boxfill8_v1(0, FONT_Y_SIZE * 5, 10 * FONT_X_SIZE, FONT_Y_SIZE * (5 + 1), COL8_000000);
+        putfonts8_asc_v1(0, FONT_Y_SIZE * 5, COL8_FFFFFF, tmp_string);
     }
     io_sti();
 }

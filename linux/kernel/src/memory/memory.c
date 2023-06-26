@@ -4,6 +4,7 @@
 #include "memory.h"
 #include "header.h"
 #include "arraymem.c"
+#include "log.h"
 //#pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wint-to-pointer-cast"
 #pragma clang diagnostic ignored "-Wvoid-pointer-to-int-cast"
@@ -99,6 +100,9 @@ void mem_init_config(unsigned int start_address, unsigned int memory_size) {
     memory_map_table.memory_size = memory_size - map_table_size;
     memory_map_table.memory_used = 0;
     memory_map_table.memory_free_table = &memory_free_table_list;
+
+    log_info("memory_map_table: start_address: %x, memory_size: %d\n",
+             memory_map_table.start_address, memory_map_table.memory_size);
 
     // 初始化记录全部的空闲空间
     MemoryBlock full_free_block = {

@@ -16,6 +16,8 @@ void mousebuf_init();
 void mousebuf_deal();
 
 void enable_mouse();
-void init_mouse_cursor8();
+void init_mouse_cursor8(unsigned char *mouse_cursor);
+
+//extern unsigned char mouse_cursor[16 * 16];
 
 #endif

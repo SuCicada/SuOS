@@ -11,7 +11,6 @@ https://www.gnu.org/software/make/manual/html_node/Automatic-Variables.html
 
 <pre>
 floppy.nas 已经没有用了
-目前来说 screen.c 也没用
 
 一张软盘 80柱面 2个磁头 18扇区 一个扇区512B
 一共 1474560 B
@@ -32,7 +31,7 @@ floppy.nas 已经没有用了
 0x00100000 -- 0x0026f7ff : (1470 KB)
 0x0026f800 -- 0x0026ffff : 设置为 IDT (2 KB)
 0x00270000 -- 0x0027ffff : 设置为 GDT, 这个地址可以随便指定 (64 KB)
-0x00280000 -- 0x002fffff : seg 3, 把 kernel 拷贝到这里 (512 KB)
+0x00280000 -- 0x002fffff : seg 3, 把 kernel 拷贝到这里 (512 KB)(0x00080000 B) , 对应 entry 的 copy_main
 0x00300000 -- 0x003fffff :
 
 0x00400000 -- 0x0040d000 : 内存分配表

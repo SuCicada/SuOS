@@ -28,19 +28,34 @@ LDFLAGS = -m elf_i386  -nostdlib
 
 SOURCE_FILES := $(filter-out $(wildcard output/*),  $(wildcard * src/* src/*/* ))
 
+
+_CODE_OBJ_ITEM := $(wildcard src/*/.)
+_CODE_OBJ_ITEM := $(patsubst src/%/.,%, $(_CODE_OBJ_ITEM))
+_CODE_OBJ_ITEM := $(filter-out \
+	asmfunc hankaku rbtree tmp \
+	,$(_CODE_OBJ_ITEM))
+_CODE_OBJ_ITEM := $(patsubst %, %.o, $(_CODE_OBJ_ITEM))
+
+
 # 注意，顺序很重要，entry 要在第一个
 ENTRY_OBJ = entry.o
-CODE_OBJ = main.o asmfunc.o asmfunc0.o \
-	color.o \
-	keyboard.o \
-	list.o \
-	memory.o \
-	mouse.o \
-	queue.o \
-	serial.o \
-	utils.o \
-	dsctbl.o \
-	int.o \
+CODE_OBJ := main.o asmfunc.o asmfunc0.o \
+			dsctbl.o \
+			int.o \
+		 $(_CODE_OBJ_ITEM)
+
+#	color.o \
+#	keyboard.o \
+#	list.o \
+#	log.o \
+#	memory.o \
+#	mouse.o \
+#	queue.o \
+#	screen.o \
+#	serial.o \
+#	utils.o \
+
+#	tmp.o \
 
 ENTRY_OBJ_FILES :=  $(patsubst %, $(OUTPUT)/%, $(ENTRY_OBJ))
 CODE_OBJ_FILES  := $(patsubst %, $(OUTPUT)/%, $(CODE_OBJ))
@@ -57,7 +72,7 @@ all: build
 
 info:
 	@echo OUTPUT: 		$(OUTPUT)
-	@echo SOURCE_FILES: $(SOURCE_FILES)
+	@#echo SOURCE_FILES: $(SOURCE_FILES)
 	@echo OBJ_FILES: 	$(OBJ_FILES)
 	@echo CFLAGS:    	$(CFLAGS)
 	@echo src_dir:		$(src_dir)

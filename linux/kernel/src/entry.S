@@ -149,6 +149,8 @@ protcseg:
   # Set up the stack pointer and call into C.
   movl    $start, %esp
 
+# 把 main 后的代码复制到 0x00280000, 复制 0x00080000 byte
+
 #define KERNEL_CODE 0x00280000
 copy_main:
   mov $main, %esi

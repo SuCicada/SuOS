@@ -45,14 +45,14 @@ struct MemoryBlock {
 #define map_table_frees 4096
 
 /** 12 byte  */
-struct MEMORY_MAP_TABLE {
+typedef struct MEMORY_MAP_TABLE {
 //    int map_table_size;
     unsigned int start_address;
     unsigned int memory_size; // equals to end_address
     unsigned int memory_used;
     List *memory_free_table; // [MemoryBlock] table of free space
-};
-#define MEMORY_MAP_TABLE struct MEMORY_MAP_TABLE
+} MEMORY_MAP_TABLE;
+//#define MEMORY_MAP_TABLE struct MEMORY_MAP_TABLE
 
 extern MEMORY_MAP_TABLE memory_map_table;
 extern List memory_free_table_list;

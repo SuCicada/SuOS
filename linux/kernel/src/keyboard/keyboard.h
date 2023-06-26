@@ -1,4 +1,5 @@
 #ifndef KEYBUF
+#include "queue.h"
 struct KEYBUF {
     Queue queue;
     int size;

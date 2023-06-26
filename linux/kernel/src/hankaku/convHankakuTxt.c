@@ -1,7 +1,12 @@
-#define _GNU_SOURCE
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
+extern char *fgets (char *__restrict __s, int __n, FILE *__restrict __stream);
+extern int strncmp (const char *__s1, const char *__s2, size_t __n);
+extern size_t strlen (const char *__s);
+extern FILE *fopen (const char *__restrict __filename,const char *__restrict __modes);
+extern void exit (int __status);
 
 #define FONT_EMPTY_CHAR '.'
 #define FONT_SITE_CHAR '*'
@@ -9,6 +14,7 @@
 
 int fontStr2Int(char* str);
 FILE* openFile(char* name, char* type);
+
 
 int main(int argc, char* argv[]) {
     char* txt = argv[1];

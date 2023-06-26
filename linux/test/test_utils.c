@@ -1,12 +1,12 @@
 #include "../kernel/src/utils/utils.h"
 #include "../kernel/src/utils/utils.c"
 #include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <resolv.h>
+//#include <stdlib.h>
+//#include <unistd.h>
+//#include <resolv.h>
 
-extern int sprintf(char *__restrict __s,
-                   const char *__restrict __format, ...);
+//extern int sprintf(char *__restrict __s,
+//                   const char *__restrict __format, ...);
 
 extern void *malloc(size_t __size);
 

@@ -11,7 +11,7 @@ Queue mousebuf;
 //char tmp_string[128];
 
 unsigned char mousebuf_mem[32]; // 为了能初始化固定的内存空间
-char mouse_cursor[16 * 16];
+//char mouse_cursor[16 * 16];
 
 struct MOUSE_DEC mouse_dec;
 
@@ -31,8 +31,8 @@ void enable_mouse(void) {
     /* 顺利的话，键盘控制器会返回ACK(0xfa) */
 }
 
-void init_mouse_cursor8() {
-    char *mouse = mouse_cursor;
+void init_mouse_cursor8(unsigned char *mouse_cursor) {
+    unsigned char *mouse = mouse_cursor;
     char outline = COL8_000000;
     char inside = COL8_FFFFFF;
     const static char mouse_cursor_img[16][16] = {
@@ -77,7 +77,7 @@ void init_mouse_cursor8() {
 
     mouse_now_site_x = 100;
     mouse_now_site_y = 100;
-    putblock(mouse_now_site_x, mouse_now_site_y, 16, 16, mouse);
+//    putblock(mouse_now_site_x, mouse_now_site_y, 16, 16, mouse);
 }
 
 
@@ -142,7 +142,7 @@ void mousebuf_deal() {
             su_sprintf(tmp_string, "%d", n);
             int x = FONT_X_SIZE * (i * 5);
             boxfill8_s(x, 3 * FONT_Y_SIZE, 5 * FONT_X_SIZE, FONT_Y_SIZE, COL8_000000);
-            putfonts8_asc(x, 3 * FONT_Y_SIZE, COL8_FFFFFF, tmp_string);
+            putfonts8_asc_v1(x, 3 * FONT_Y_SIZE, COL8_FFFFFF, tmp_string);
         }
         putblock(mouse_now_site_x, mouse_now_site_y, 16, 16, mouse_screen_origin);
 
@@ -156,7 +156,7 @@ void mousebuf_deal() {
         if (mouse_now_site_y > DISPLAY_Y_SIZE - 16) mouse_now_site_y = DISPLAY_Y_SIZE - 16;
 
         getblock(mouse_now_site_x, mouse_now_site_y, 16, 16, mouse_screen_origin);
-        putblock(mouse_now_site_x, mouse_now_site_y, 16, 16, mouse_cursor);
+//        putblock(mouse_now_site_x, mouse_now_site_y, 16, 16, mouse_cursor);
     }
 
     io_sti();
