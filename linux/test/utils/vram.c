@@ -37,8 +37,7 @@ DECLSPEC Uint32 SDLCALL map_color(int color_flag) {
     int b = rgb_table[3 * color_flag + 2];
     return SDL_MapRGB(surface->format, r, g, b);
 }
-
-int vram_simulator(const unsigned char *vram0, int xsize, int ysize) {
+int vram_simulator_init(int xsize, int ysize){
 //    unsigned char *vram0 = (unsigned char *) malloc(sizeof(unsigned char) * xsize * ysize);
 //    memcpy(vram0, _vram0, sizeof(unsigned char) * xsize * ysize);
 
@@ -61,6 +60,8 @@ int vram_simulator(const unsigned char *vram0, int xsize, int ysize) {
     }
 
     surface = SDL_GetWindowSurface(window);
+}
+int vram_simulator_update(const unsigned char *vram0) {
 
 //    memcpy(vram, vram0, sizeof(vram));
     // Clear VRAM
@@ -78,9 +79,11 @@ int vram_simulator(const unsigned char *vram0, int xsize, int ysize) {
     renderVRAM();
 
     // Main loop
-    SDL_Event event;
-    bool quit = false;
 
+}
+int vram_simulator_wait() {
+    bool quit = false;
+    SDL_Event event;
     while (!quit) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
@@ -88,7 +91,6 @@ int vram_simulator(const unsigned char *vram0, int xsize, int ysize) {
             }
         }
     }
-
 //    return 0;
     SDL_DestroyWindow(window);
     SDL_Quit();

@@ -74,14 +74,14 @@ int test_mouse() {
                      sht_mouse->vx0 + sht_mouse->bxsize, sht_mouse->vy0 + sht_mouse->bysize,
                      0);
 //    show_block(ctl->map, xsize, ysize, 0);
-    vram_simulator(ctl->map, xsize, ysize);
+//    vram_simulator(ctl->map, xsize, ysize);
 
     printf("==================== sheet_refreshsub ====================\n");
     sheet_refreshsub(ctl,
                      sht_mouse->vx0, sht_mouse->vy0,
                      sht_mouse->vx0 + sht_mouse->bxsize, sht_mouse->vy0 + sht_mouse->bysize,
                      0, 1);
-    vram_simulator(ctl->vram, xsize, ysize);
+//    vram_simulator(ctl->vram, xsize, ysize);
 
 //    for (int j = 0; j < ysize; ++j) {
 //        for (int i = 0; i < xsize; ++i) {
@@ -122,7 +122,6 @@ int main() {
 //    sheet_refresh_whole(shtctl, sht_mouse);
     printf("shtctl->top: %d\n", shtctl->top);
     sheet_updown(sht_back, 0);
-    sheet_updown(sht_mouse, 99);
 
     show_sheet(sht_mouse);
 
@@ -136,5 +135,23 @@ int main() {
 //                     0, 1);
 //
 //    show_block(shtctl->vram, xsize, ysize, -1);
-    vram_simulator(shtctl->vram, xsize, ysize);
+    unsigned char *vram0 = shtctl->vram;
+    vram_simulator_init(xsize, ysize);
+    vram_simulator_update(vram0);
+//    SDL_Delay(1000);
+
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+        printf("event.type: %d\n", event.type);
+    }
+    sheet_updown(sht_mouse, 99);
+    vram_simulator_update(vram0);
+    SDL_Delay(1000);
+
+
+    sheet_move(sht_mouse, 100,100);
+    vram_simulator_update(vram0);
+
+
+    vram_simulator_wait();
 }

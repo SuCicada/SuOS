@@ -125,119 +125,38 @@ void sheet_setbuf(SHEET *sht, unsigned char *buf, int xsize, int ysize, int col_
 refresh absolute position, between:
  (vx0, vy0, layer) -> (vx1, vy1, layerend)
 
-
+ @args: c:  pixel color flag
+        to: absolute position
 */
-
-unsigned char *vram_tmp;
-
-void sheet_refreshsub0(SHTCTL *ctl,
-                       int vx0, int vy0,
-                       int vx1, int vy1,
-                       int layer, int layerend) {
-    int h, bx, by, vx, vy, bx0, bx1, by0, by1;
-    unsigned char *buf, *vram = ctl->vram;
-    unsigned char sid;
-    unsigned char c;
-    unsigned char *map = ctl->map;
-
-    SHEET *sht;
-    if (vx0 < 0) vx = 0;
-    if (vy0 < 0) vy = 0;
-    if (vx1 > ctl->xsize) vx1 = ctl->xsize;
-    if (vy1 > ctl->ysize) vy1 = ctl->ysize;
-    for (h = layer; h <= layerend; h++) {
-        sht = ctl->sheets[h]; // current sheet
-        sid = sht - ctl->sheet;
-        buf = sht->buf;
-
-        bx0 = vx0 - sht->vx0;
-        by0 = vy0 - sht->vy0;
-
-        bx1 = vx1 - sht->vx0;
-        by1 = vy1 - sht->vy0;
-
-        if (bx0 < 0)bx0 = 0;
-        if (by0 < 0)by0 = 0;
-        if (bx1 > sht->bxsize)bx1 = sht->bxsize;
-        if (by1 > sht->bysize)by1 = sht->bysize;
-        for (by = by0; by < by1; by++) {
-            vy = sht->vy0 + by;
-            for (bx = bx0; bx < bx1; bx++) {
-                vx = sht->vx0 + bx;
-
-                c = map[vy * ctl->xsize + vx];
-                if (c == sid) {
-                    vram[vy * ctl->xsize + vx] = buf[by * sht->bxsize + bx];;
-                }
-            }
-        }
-        // if(h==1)  while(1);
-    }
-}
-
-void sheet_refreshsub(SHTCTL *ctl,
-                      int vx0, int vy0,
-                      int vx1, int vy1,
-                      int layer, int layerend) {
+void sheet_refreshsub_0(SHTCTL *ctl,
+                        SHEET *sht,
+                        unsigned char c, int to) {
+    int sid = sht->id;
     unsigned char *map = ctl->map;
     unsigned char *vram = ctl->vram;
 
-    if (vx0 < 0) vx0 = 0;
-    if (vy0 < 0) vy0 = 0;
-    if (vx1 > ctl->xsize) vx1 = ctl->xsize;
-    if (vy1 > ctl->ysize) vy1 = ctl->ysize;
-    for (int h = layer; h <= layerend; h++) {
-        debug("h:%d\n", h);
-        SHEET *sht = ctl->sheets[h]; // sheet on current layer
-        if(sht==NULL){
-            log_println("sht is null");
-            continue;
-        }
-//        int sid = h + 1;
-        int sid = sht->id;
-        unsigned char *buf = sht->buf;
-
-        int sht_x0 = sht->vx0;
-        int bx0 = (sht_x0 < vx0) * vx0 +
-                  (sht_x0 >= vx0 && sht_x0 <= vx1) * sht_x0;
-
-        int sht_x1 = sht->vx0 + sht->bxsize;
-        int bx1 = (sht_x1 < vx0) * vx0 +
-                  (vx0 <= sht_x1 && sht_x1 <= vx1) * sht_x1;
-
-        int sht_y0 = sht->vy0;
-        int by0 = (sht_y0 < vy0) * vy0 +
-                  (vy0 <= sht_y0 && sht_y0 <= vy1) * sht_y0;
-
-        int sht_y1 = sht->vy0 + sht->bysize;
-        int by1 = (sht_y1 < vy0) * vy0 +
-                  (vy0 <= sht_y1 && sht_y1 <= vy1) * sht_y1;
-        for (int by = by0; by < by1; by++) {
-            for (int bx = bx0; bx < bx1; bx++) {
-//                debug("bx:%d, by:%d\n", bx, by);
-                int from = (by - sht->vy0) * sht->bxsize + (bx - sht->vx0);
-                int c = buf[from];
-//                if (c != sht->col_inv) {
-                int to = by * ctl->xsize + bx;
-//                    map[to] = sid; // refresh
-//                }
-                if (map[to] == sid) {
-                    vram[to] = c;
-                }
-            }
-        }
+    if (map[to] == sid) {
+        vram[to] = c;
     }
 }
 
-// 更新的层级：layer -> top
-// relative position
-//
-void sheet_refreshmap(SHTCTL *ctl, int vx0, int vy0, int vx1, int vy1, int layer) {
-//    int bx, by, vx, vy, bx0, by0, bx1, by1;
-//    unsigned char *buf, *vram = ctl->vram;
+void sheet_refreshmap_0(SHTCTL *ctl,
+                        SHEET *sht,
+                        unsigned char c, int to) {
+    int sid = sht->id;
+    unsigned char *map = ctl->map;
+    if (c != sht->col_inv) {
+        map[to] = sid; // refresh
+    }
+}
+
+void sheet_refresh_base(SHTCTL *ctl,
+                        int vx0, int vy0,
+                        int vx1, int vy1,
+                        int layer, int layerend,
+                        void (*refresh)(SHTCTL *ctl, SHEET *sht, unsigned char c, int to)) {
     unsigned char *map = ctl->map;
 //    unsigned char sid;
-    unsigned char c;
 
     if (vx0 < 0) vx0 = 0;
     if (vy0 < 0) vy0 = 0;
@@ -253,8 +172,8 @@ void sheet_refreshmap(SHTCTL *ctl, int vx0, int vy0, int vx1, int vy1, int layer
         //printdebug((unsigned)sid,0);
         unsigned char *buf = sht->buf;
 
-        int bx0, by0; // left right
-        int bx1, by1;
+        int bx0 = -1, by0 = -1; // left right
+        int bx1 = -1, by1 = -1;
         /*
 
          x0       x1
@@ -276,8 +195,9 @@ void sheet_refreshmap(SHTCTL *ctl, int vx0, int vy0, int vx1, int vy1, int layer
         } else if (sht_x0 >= vx0 && sht_x0 <= vx1) { // middle
             bx0 = sht_x0;
         } else if (sht_x0 > vx1) { // right
-            // not overlap
+            // not overlap`
         }
+        if (bx0 == -1) continue;
 
         // 等价的
         /*
@@ -286,16 +206,122 @@ void sheet_refreshmap(SHTCTL *ctl, int vx0, int vy0, int vx1, int vy1, int layer
          */
 
         int sht_x1 = sht->vx0 + sht->bxsize;
-        bx1 = (sht_x1 < vx0) * vx0 +
-              (vx0 <= sht_x1 && sht_x1 <= vx1) * sht_x1;
+        bx1 = (sht_x1 < vx0) * -1 +
+              (vx0 <= sht_x1 && sht_x1 <= vx1) * sht_x1 +
+              (vx1 < sht_x1) * vx1;
+        if (bx1 == -1) continue;
 
         int sht_y0 = sht->vy0;
         by0 = (sht_y0 < vy0) * vy0 +
               (vy0 <= sht_y0 && sht_y0 <= vy1) * sht_y0;
+        if (by0 == -1) continue;
 
         int sht_y1 = sht->vy0 + sht->bysize;
-        by1 = (sht_y1 < vy0) * vy0 +
-              (vy0 <= sht_y1 && sht_y1 <= vy1) * sht_y1;
+        by1 = (sht_y1 < vy0) * -1 +
+              (vy0 <= sht_y1 && sht_y1 <= vy1) * sht_y1 +
+              (vy1 < sht_y1) * vy1;
+        if (by1 == -1) continue;
+
+
+        for (int by = by0; by < by1; by++) {
+            for (int bx = bx0; bx < bx1; bx++) {
+                int from = (by - sht->vy0) * sht->bxsize + (bx - sht->vx0);
+                unsigned char c = buf[from];
+//                if (c != sht->col_inv) {
+                int to = by * ctl->xsize + bx;
+//                    map[to] = sid; // refresh
+//                }
+                refresh(ctl, sht, c, to);
+            }
+        }
+    }
+}
+
+void sheet_refreshsub(SHTCTL *ctl,
+                      int vx0, int vy0,
+                      int vx1, int vy1,
+                      int layer, int layerend) {
+    sheet_refresh_base(ctl, vx0, vy0, vx1, vy1, layer, layerend,
+                       sheet_refreshsub_0);
+}
+
+// 更新的层级：layer -> top
+// relative position
+void sheet_refreshmap(SHTCTL *ctl, int vx0, int vy0, int vx1, int vy1, int layer) {
+    sheet_refresh_base(ctl, vx0, vy0, vx1, vy1, layer, ctl->top,
+                       sheet_refreshmap_0);
+}
+
+void __sheet_refreshmap(SHTCTL *ctl, int vx0, int vy0, int vx1, int vy1, int layer) {
+//    int bx, by, vx, vy, bx0, by0, bx1, by1;
+//    unsigned char *buf, *vram = ctl->vram;
+    unsigned char *map = ctl->map;
+//    unsigned char sid;
+    unsigned char c;
+
+    if (vx0 < 0) vx0 = 0;
+    if (vy0 < 0) vy0 = 0;
+    if (vx1 > ctl->xsize) vx1 = ctl->xsize;
+    if (vy1 > ctl->ysize) vy1 = ctl->ysize;
+    for (int h = layer; h <= ctl->top; h++) {
+        debug("h:%d\n", h);
+        SHEET *sht = ctl->sheets[h]; // sheet on current layer
+//        int sid = h + 1;
+        int sid = sht->id;
+
+//        sid = sht - ctl->sheet;
+        //printdebug((unsigned)sid,0);
+        unsigned char *buf = sht->buf;
+
+        int bx0 = -1, by0 = -1; // left right
+        int bx1 = -1, by1 = -1;
+        /*
+
+         x0       x1
+         |         |
+         |         |
+         xxxxxxxxxxx ------ y0
+         |xxxxxxxxx|
+         |xxxxxxxxx|
+         |xxxxxxxxx|
+         xxxxxxxxxxx ------- y1
+
+         */
+        // vx0, vy0, vx1, vy1 : refresh area
+        // sht                : sht area
+        // 1. sht x0 cmp  ref x0, x1
+        int sht_x0 = sht->vx0;
+        if (sht_x0 < vx0) { // left
+            bx0 = vx0;
+        } else if (sht_x0 >= vx0 && sht_x0 <= vx1) { // middle
+            bx0 = sht_x0;
+        } else if (sht_x0 > vx1) { // right
+            // not overlap`
+        }
+        if (bx0 == -1) continue;
+
+        // 等价的
+        /*
+        bx0 = (sht_x0 < vx0) * vx0 +
+              (sht_x0 >= vx0 && sht_x0<= vx1) * sht_x0;
+         */
+
+        int sht_x1 = sht->vx0 + sht->bxsize;
+        bx1 = (sht_x1 < vx0) * -1 +
+              (vx0 <= sht_x1 && sht_x1 <= vx1) * sht_x1 +
+              (vx1 < sht_x1) * vx1;
+        if (bx1 == -1) continue;
+
+        int sht_y0 = sht->vy0;
+        by0 = (sht_y0 < vy0) * vy0 +
+              (vy0 <= sht_y0 && sht_y0 <= vy1) * sht_y0;
+        if (by0 == -1) continue;
+
+        int sht_y1 = sht->vy0 + sht->bysize;
+        by1 = (sht_y1 < vy0) * -1 +
+              (vy0 <= sht_y1 && sht_y1 <= vy1) * sht_y1 +
+              (vy1 < sht_y1) * vy1;
+        if (by1 == -1) continue;
 
 
 //        // 这里是为了能圈出一个矩形，绘制区域和 sheet 相交的部分
@@ -420,7 +446,6 @@ void sheet_move(SHEET *sht, int vx0, int vy0) {
         sheet_refreshsub(ctl, old_vx0, old_vy0, old_vx0 + sht->bxsize, old_vy0 + sht->bysize, 0, sht->height - 1);
         sheet_refreshsub(ctl, vx0, vy0, vx0 + sht->bxsize, vy0 + sht->bysize, sht->height, sht->height);
     }
-    return;
 }
 
 void sheet_free(SHEET *sht) {
@@ -428,5 +453,4 @@ void sheet_free(SHEET *sht) {
         sheet_updown(sht, -1);
 
     sht->flags = 0;
-    return;
 }
