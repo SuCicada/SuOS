@@ -7,7 +7,7 @@ todo
 - [ ] memory 的设计文档
 
 - [ ] 内存管理:
-  - [ ] malloc 实现
+  - [x] malloc 实现
   - [ ] 边界标记法 ptmalloc
 
 https://github.com/pollenjp/myHariboteOS

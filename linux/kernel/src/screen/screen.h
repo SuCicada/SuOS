@@ -13,7 +13,7 @@ typedef struct SHEET {
     int bysize;         // y size
     int vx0;            // x position
     int vy0;            // y position
-    int col_inv;
+    unsigned char col_inv;
     int height;         // z position
     int flags;          // is allocated
     struct SHTCTL * ctl;

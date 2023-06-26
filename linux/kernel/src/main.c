@@ -61,26 +61,27 @@ void bootmain(void) {
     mem_free(tmp_string);
 
 
-    unsigned char *desktop = (unsigned char *) mem_alloc(DISPLAY_X_SIZE * DISPLAY_Y_SIZE);
+//    unsigned char *desktop = (unsigned char *) mem_alloc(DISPLAY_X_SIZE * DISPLAY_Y_SIZE);
     unsigned char *win_buf = (unsigned char *) mem_alloc(160 * 65);
 
     SHTCTL *shtctl = shtctl_init(binfo->vram, binfo->scrnx, binfo->scrny);
     SHEET *sht_back, *sht_win;
 
-    init_screen(desktop, DISPLAY_X_SIZE, DISPLAY_Y_SIZE);
+//    init_screen(desktop, DISPLAY_X_SIZE, DISPLAY_Y_SIZE);
 
-    sht_back = sheet_alloc(shtctl);
+//    sht_back = sheet_alloc(shtctl);
 
-    sheet_setbuf(sht_back, desktop, 320, 200, -1);
+//    sheet_setbuf(sht_back, desktop, 320, 200, -1);
+    sht_back = create_background_sheet(shtctl);
     sheet_move(sht_back, 0, 0);
     sheet_updown(sht_back, 0);
 
     // ----- mouse ----------
-    unsigned char *mouse_cursor = (unsigned char *) mem_alloc(16 * 16);
-    init_mouse_cursor8(mouse_cursor);
-
-    SHEET *sht_mouse = sheet_alloc(shtctl);
-    sheet_setbuf(sht_mouse, mouse_cursor, 16, 16, 99);
+//    unsigned char *mouse_cursor = (unsigned char *) mem_alloc(16 * 16);
+//    init_mouse_cursor8(mouse_cursor);
+    SHEET *sht_mouse = create_mouse_sheet(shtctl);
+//    SHEET *sht_mouse = sheet_alloc(shtctl);
+//    sheet_setbuf(sht_mouse, mouse_cursor, 16, 16, 99);
     sheet_move(sht_mouse, 0, 0);
     sheet_updown(sht_mouse, 2);
 

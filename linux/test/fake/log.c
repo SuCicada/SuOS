@@ -12,6 +12,7 @@ void log_println(char *_format, ...) {
     va_list args;
     va_start(args, _format);
     vprintf(_format, args);
+    printf("\n");
     va_end(args);
 }
 

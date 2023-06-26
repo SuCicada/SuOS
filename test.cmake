@@ -48,9 +48,10 @@ file(GLOB_RECURSE test_SOURCE_FILES
         "linux/kernel/src/*/*.h"
         #        "linux/kernel/src/asmfunc/asmfunc.S"
         #        "linux/kernel/src/*.asm"
-        "linux/test/utils/*"
+        "linux/test/fake/*"
         )
 
+# 去除不编译的代码
 set(EXCLUDE_DIRS
         "linux/kernel/src/hankaku"
         "linux/kernel/src/rbtree"

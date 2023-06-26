@@ -3,6 +3,26 @@
 //
 #include "screen.h"
 #include "color.h"
+#include "window.h"
+#include "mouse.h"
+
+SHEET *create_background_sheet(SHTCTL *shtctl){
+    unsigned char *desktop = (unsigned char *) mem_alloc(DISPLAY_X_SIZE * DISPLAY_Y_SIZE);
+    init_screen(desktop, DISPLAY_X_SIZE, DISPLAY_Y_SIZE);
+
+    SHEET * sht_back = sheet_alloc(shtctl);
+    sheet_setbuf(sht_back, desktop, 320, 200, -1);
+
+    return sht_back;
+}
+SHEET *create_mouse_sheet(SHTCTL *shtctl){
+    unsigned char *mouse_cursor = (unsigned char *) mem_alloc(16 * 16);
+    init_mouse_cursor8(mouse_cursor);
+    SHEET *sht_mouse = sheet_alloc(shtctl);
+    sheet_setbuf(sht_mouse, mouse_cursor, 16, 16, -1);
+    return sht_mouse;
+}
+
 
 void init_screen(unsigned char *buf, int xsize, int ysize) {
 //    int xsize = DISPLAY_X_SIZE, ysize = DISPLAY_Y_SIZE;

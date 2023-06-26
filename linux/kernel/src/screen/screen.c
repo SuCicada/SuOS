@@ -119,7 +119,6 @@ void sheet_setbuf(SHEET *sht, unsigned char *buf, int xsize, int ysize, int col_
     sht->bxsize = xsize;
     sht->bysize = ysize;
     sht->col_inv = col_inv;
-    return;
 }
 
 /*
@@ -190,8 +189,12 @@ void sheet_refreshsub(SHTCTL *ctl,
     for (int h = layer; h <= layerend; h++) {
         debug("h:%d\n", h);
         SHEET *sht = ctl->sheets[h]; // sheet on current layer
-        int sid = h + 1;
-
+        if(sht==NULL){
+            log_println("sht is null");
+            continue;
+        }
+//        int sid = h + 1;
+        int sid = sht->id;
         unsigned char *buf = sht->buf;
 
         int sht_x0 = sht->vx0;
@@ -209,9 +212,9 @@ void sheet_refreshsub(SHTCTL *ctl,
         int sht_y1 = sht->vy0 + sht->bysize;
         int by1 = (sht_y1 < vy0) * vy0 +
                   (vy0 <= sht_y1 && sht_y1 <= vy1) * sht_y1;
-
         for (int by = by0; by < by1; by++) {
             for (int bx = bx0; bx < bx1; bx++) {
+//                debug("bx:%d, by:%d\n", bx, by);
                 int from = (by - sht->vy0) * sht->bxsize + (bx - sht->vx0);
                 int c = buf[from];
 //                if (c != sht->col_inv) {
@@ -243,7 +246,9 @@ void sheet_refreshmap(SHTCTL *ctl, int vx0, int vy0, int vx1, int vy1, int layer
     for (int h = layer; h <= ctl->top; h++) {
         debug("h:%d\n", h);
         SHEET *sht = ctl->sheets[h]; // sheet on current layer
-        int sid = h + 1;
+//        int sid = h + 1;
+        int sid = sht->id;
+
 //        sid = sht - ctl->sheet;
         //printdebug((unsigned)sid,0);
         unsigned char *buf = sht->buf;
@@ -325,6 +330,8 @@ void sheet_refreshmap(SHTCTL *ctl, int vx0, int vy0, int vx1, int vy1, int layer
 void sheet_updown(SHEET *sht, int height) {
     int h, old = sht->height;
     SHTCTL *ctl = sht->ctl;
+
+    // 1. check
     if (height > ctl->top + 1) {
         height = ctl->top + 1;
     }
@@ -332,6 +339,8 @@ void sheet_updown(SHEET *sht, int height) {
     if (height < -1) {
         height = -1;
     }
+
+    // 2. update sheet
     sht->height = height;
 
     if (old > height) {
@@ -372,14 +381,13 @@ void sheet_updown(SHEET *sht, int height) {
             }
             ctl->sheets[height] = sht;
         } else {
-
+            // 初次出现，从顶向下交换
             for (h = ctl->top; h >= height; h--) {
                 ctl->sheets[h + 1] = ctl->sheets[h];
                 ctl->sheets[h + 1]->height = h + 1;
             }
             ctl->sheets[height] = sht;
             ctl->top++;
-
         }
         sheet_refreshmap(ctl, sht->vx0, sht->vy0, sht->vx0 + sht->bxsize, sht->vy0 + sht->bysize, height);
         sheet_refreshsub(ctl, sht->vx0, sht->vy0, sht->vx0 + sht->bxsize, sht->vy0 + sht->bysize, height, height);
