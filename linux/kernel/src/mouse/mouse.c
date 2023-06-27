@@ -1,6 +1,8 @@
 #include "header.h"
 #include "mouse.h"
 #include "keyboard.h"
+#include "screen.h"
+#include "log.h"
 
 int mouse_now_site_x;
 int mouse_now_site_y;
@@ -81,11 +83,13 @@ void init_mouse_cursor8(unsigned char *mouse_cursor) {
 }
 
 
-void mousebuf_deal() {
+void mousebuf_deal(SHEET* mouse_sheet) {
     io_cli();
     // for(int i=0;i<100000;i++);
     Queue *buf_ptr = &mousebuf;
     unsigned char data;
+
+    // 鼠标动了
     if (!queue_empty(buf_ptr)) {
         data = queue_pop(buf_ptr);
         if (mouse_dec.group_flag == -1) {
@@ -144,7 +148,10 @@ void mousebuf_deal() {
             boxfill8_s(x, 3 * FONT_Y_SIZE, 5 * FONT_X_SIZE, FONT_Y_SIZE, COL8_000000);
             putfonts8_asc_v1(x, 3 * FONT_Y_SIZE, COL8_FFFFFF, tmp_string);
         }
-        putblock(mouse_now_site_x, mouse_now_site_y, 16, 16, mouse_screen_origin);
+//        sheet_move(mouse_sheet, mouse_now_site_x, mouse_now_site_y);
+//        putblock(mouse_now_site_x, mouse_now_site_y, 16, 16, mouse_screen_origin);
+
+        // 更新鼠标位置
 
         // if (mouse_dec.x >= 0 && mouse_dec.x <= DISPLAY_X_SIZE - 16)
         mouse_now_site_x += mouse_dec.x;
@@ -155,7 +162,11 @@ void mousebuf_deal() {
         if (mouse_now_site_y < 0) mouse_now_site_y = 0;
         if (mouse_now_site_y > DISPLAY_Y_SIZE - 16) mouse_now_site_y = DISPLAY_Y_SIZE - 16;
 
-        getblock(mouse_now_site_x, mouse_now_site_y, 16, 16, mouse_screen_origin);
+        if (mouse_dec.x != 0 || mouse_dec.y != 0){
+            sheet_move(mouse_sheet, mouse_now_site_x, mouse_now_site_y);
+        }
+//        log_println("mouse_now_site_x: %d :%d", mouse_now_site_x, mouse_now_site_y);
+//        getblock(mouse_now_site_x, mouse_now_site_y, 16, 16, mouse_screen_origin);
 //        putblock(mouse_now_site_x, mouse_now_site_y, 16, 16, mouse_cursor);
     }
 

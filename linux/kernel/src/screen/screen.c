@@ -155,18 +155,19 @@ void sheet_refresh_base(SHTCTL *ctl,
                         int vx1, int vy1,
                         int layer, int layerend,
                         void (*refresh)(SHTCTL *ctl, SHEET *sht, unsigned char c, int to)) {
-    unsigned char *map = ctl->map;
+//    unsigned char *map = ctl->map;
 //    unsigned char sid;
 
     if (vx0 < 0) vx0 = 0;
     if (vy0 < 0) vy0 = 0;
     if (vx1 > ctl->xsize) vx1 = ctl->xsize;
     if (vy1 > ctl->ysize) vy1 = ctl->ysize;
+    int sum = 0;
     for (int h = layer; h <= ctl->top; h++) {
         debug("h:%d\n", h);
         SHEET *sht = ctl->sheets[h]; // sheet on current layer
 //        int sid = h + 1;
-        int sid = sht->id;
+//        int sid = sht->id;
 
 //        sid = sht - ctl->sheet;
         //printdebug((unsigned)sid,0);
@@ -222,7 +223,7 @@ void sheet_refresh_base(SHTCTL *ctl,
               (vy1 < sht_y1) * vy1;
         if (by1 == -1) continue;
 
-
+//        log_println("bx0:%d, by0:%d, bx1:%d, by1:%d", bx0, by0, bx1, by1);
         for (int by = by0; by < by1; by++) {
             for (int bx = bx0; bx < bx1; bx++) {
                 int from = (by - sht->vy0) * sht->bxsize + (bx - sht->vx0);
@@ -232,9 +233,11 @@ void sheet_refresh_base(SHTCTL *ctl,
 //                    map[to] = sid; // refresh
 //                }
                 refresh(ctl, sht, c, to);
+//                sum++;
             }
         }
     }
+//    log_println("refresh calc sum:%d", sum);
 }
 
 void sheet_refreshsub(SHTCTL *ctl,
@@ -445,6 +448,7 @@ void sheet_move(SHEET *sht, int vx0, int vy0) {
         //sheet_refresh(ctl);
         sheet_refreshsub(ctl, old_vx0, old_vy0, old_vx0 + sht->bxsize, old_vy0 + sht->bysize, 0, sht->height - 1);
         sheet_refreshsub(ctl, vx0, vy0, vx0 + sht->bxsize, vy0 + sht->bysize, sht->height, sht->height);
+//        log_println("sheet_move:vx0:%d,vy0:%d", vx0, vy0);
     }
 }
 

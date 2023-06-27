@@ -23,6 +23,13 @@ SHEET *create_mouse_sheet(SHTCTL *shtctl){
     return sht_mouse;
 }
 
+SHEET *create_window8_sheet(SHTCTL *shtctl){
+    unsigned char *win_buf = (unsigned char *) mem_alloc(160 * 65);
+    make_window8(win_buf, 160, 68, "counter");
+    SHEET *sht_win = sheet_alloc(shtctl);
+    sheet_setbuf(sht_win, win_buf, 160, 65, -1);
+    return sht_win;
+}
 
 void init_screen(unsigned char *buf, int xsize, int ysize) {
 //    int xsize = DISPLAY_X_SIZE, ysize = DISPLAY_Y_SIZE;

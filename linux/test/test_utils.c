@@ -27,9 +27,9 @@ int main() {
     unsigned int n = 0x7fffffff + a + 1;
 
 //    su_sprintf(s, "%x|", 2634848,1,2);
-    test_int2hexstr();
+//    test_int2hexstr();
 //    printf("%s|\n", s);
-    return 0;
+//    return 0;
     sprintf(s, "nihoa: %d - %1x %05d|", a, a, 6789);
     printf("%s|\n", s);
     su_sprintf(s, "nihoa: %d - %1x %05d|", a, a, 6789);

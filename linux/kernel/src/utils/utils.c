@@ -12,9 +12,15 @@ int int2basestr(int n, char *s, int base);
 int int2basestr0(int n, char *s, int base, int is_u);
 
 int su_sprintf(char *_stream, char *_format, ...) {
+    char *arg = (char *) (&_format + 1);
+
+    return su_sprintf_ptr(_stream,
+    _format, arg);
+}
+int su_sprintf_ptr(char *_stream, char *_format,char *arg) {
     char c;
     char *stream = _stream;
-    char *arg = (char *) (&_format + 1);
+//    char *_format = *_format_ptr;
     // printf("arg %d\n",*(int*)arg);
     int n;
     int match_num_len; // len of % match num

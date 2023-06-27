@@ -11,8 +11,9 @@ debug 完整os的时候，在本机就可以了，因为gdbserver是本机的qem
 
 
 ## test on mac:
-```bash
-brew install SDL2
-brew install SDL2_image
-brew install SDL2_ttf
-```
+- screen
+    ```bash
+    brew install SDL2
+    brew install SDL2_image
+    brew install SDL2_ttf
+    ```

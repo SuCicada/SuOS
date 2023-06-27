@@ -57,7 +57,7 @@ QEMU_RUN := $(QEMU) -drive file=$(IMG),if=floppy -serial stdio
 
 run: all
 ifeq ($(SYSTEM), Darwin)
-	(sleep 1 && osascript move.scpt) &
+#	(sleep 1 && osascript move.scpt) &
 endif
 	$(QEMU_RUN)
 

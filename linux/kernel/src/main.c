@@ -12,12 +12,18 @@
   0xa0000 -> 0xaffff is screen memery
   注意这里的函数名字为bootmain，因为在entry.S中设定的入口名字也是bootmain，两者要保持一致
  */
-//char tmp_string[128];
-char aaaa[324];
+//char aaaa[324];
 
 /* 注意, bootmain 函数前面不能放任何函数 */
 _Noreturn
 void bootmain(void) {
+    char tmp_string[128];
+//    char *tmp_string = mem_alloc(128);
+//    su_sprintf(tmp_string, "memory start: %x", memory_map_table.start_address);
+//    su_sprintf(main_tmp_string, "test %d", 123);
+//    log_info(main_tmp_string);
+//    log_info("test: %d", 123);
+
     init_serial();
     write_serial_string("hello world\n");
 
@@ -39,10 +45,9 @@ void bootmain(void) {
     log_info("memory_size = %d B\n", memory_size);
     mem_init_config(MEMORY_START_ADDRESS, memory_size);
 
-    int line = 0;
-    char *tmp_string = mem_alloc(128);
 
-    su_sprintf(tmp_string, "memory start: %x", memory_map_table.start_address);
+    int line = 0;
+
     putfonts8_asc_v1(0, FONT_Y_SIZE * line++, COL8_FFFFFF, tmp_string);
     su_sprintf(tmp_string, "memory_size = %d B", memory_size);
     putfonts8_asc_v1(0, FONT_Y_SIZE * line++, COL8_FFFFFF, tmp_string);
@@ -55,26 +60,31 @@ void bootmain(void) {
     su_sprintf(tmp_string, "DISPLAY_X_SIZE = %d ", DISPLAY_X_SIZE);
     putfonts8_asc_v1(0, FONT_Y_SIZE * line++, COL8_FFFFFF, tmp_string);
 
-    su_sprintf(tmp_string, "0x%x  0x%x", tmp_string, &aaaa[1]);
+//    su_sprintf(tmp_string, "0x%x  0x%x", tmp_string, &aaaa[1]);
     putfonts8_asc_v1(0, FONT_Y_SIZE * line++, COL8_FFFFFF, tmp_string);
 
-    mem_free(tmp_string);
+//    mem_free(tmp_string);
 
 
 //    unsigned char *desktop = (unsigned char *) mem_alloc(DISPLAY_X_SIZE * DISPLAY_Y_SIZE);
-    unsigned char *win_buf = (unsigned char *) mem_alloc(160 * 65);
 
     SHTCTL *shtctl = shtctl_init(binfo->vram, binfo->scrnx, binfo->scrny);
-    SHEET *sht_back, *sht_win;
+    log_println("shtctl init done");
+//    SHEET *sht_back, *sht_win;
 
 //    init_screen(desktop, DISPLAY_X_SIZE, DISPLAY_Y_SIZE);
 
 //    sht_back = sheet_alloc(shtctl);
 
 //    sheet_setbuf(sht_back, desktop, 320, 200, -1);
-    sht_back = create_background_sheet(shtctl);
+    SHEET * sht_back = create_background_sheet(shtctl);
     sheet_move(sht_back, 0, 0);
     sheet_updown(sht_back, 0);
+
+    // ----- window ----------
+    SHEET *sht_win =create_window8_sheet(shtctl);
+    sheet_updown(sht_win, 1);
+    sheet_move(sht_win, 80, 72);
 
     // ----- mouse ----------
 //    unsigned char *mouse_cursor = (unsigned char *) mem_alloc(16 * 16);
@@ -82,13 +92,12 @@ void bootmain(void) {
     SHEET *sht_mouse = create_mouse_sheet(shtctl);
 //    SHEET *sht_mouse = sheet_alloc(shtctl);
 //    sheet_setbuf(sht_mouse, mouse_cursor, 16, 16, 99);
-    sheet_move(sht_mouse, 0, 0);
     sheet_updown(sht_mouse, 2);
+    sheet_move(sht_mouse, 100, 100);
 
-    make_window8(win_buf, 160, 68, "counter");
 
 
-    sheet_refresh(sht_back, 0, 0, DISPLAY_X_SIZE, DISPLAY_Y_SIZE);
+//    sheet_refresh(sht_back, 0, 0, DISPLAY_X_SIZE, DISPLAY_Y_SIZE);
 
     enable_keyboard();
     enable_mouse();
@@ -126,7 +135,7 @@ void bootmain(void) {
         // putfonts8_asc(15, 30, a, "can click");
         // for(int i=0;i<1000000;i++);
         keybuf_deal();
-        mousebuf_deal();
+        mousebuf_deal(sht_mouse);
 
 //        a++;
     }

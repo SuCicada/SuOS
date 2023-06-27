@@ -1,6 +1,8 @@
 #ifndef MOUSE_H
 #define MOUSE_H
 
+#include "screen.h"
+
 #define KEYCMD_SENDTO_MOUSE		0xd4
 #define MOUSECMD_ENABLE			0xf4
 
@@ -13,7 +15,7 @@ struct MOUSE_DEC {
 
 
 void mousebuf_init();
-void mousebuf_deal();
+void mousebuf_deal(SHEET* mouse_sheet);
 
 void enable_mouse();
 void init_mouse_cursor8(unsigned char *mouse_cursor);
