@@ -134,12 +134,14 @@ void sheet_refreshsub_0(SHTCTL *ctl,
     int sid = sht->id;
     unsigned char *map = ctl->map;
     unsigned char *vram = ctl->vram;
-
+//    log_println("sheet_refreshsub_0: sid: %d, c: %d, to: %d", sid, c, to);
     if (map[to] == sid) {
         vram[to] = c;
     }
 }
-
+/*
+c: color of this site
+ */
 void sheet_refreshmap_0(SHTCTL *ctl,
                         SHEET *sht,
                         unsigned char c, int to) {
@@ -163,7 +165,7 @@ void sheet_refresh_base(SHTCTL *ctl,
     if (vx1 > ctl->xsize) vx1 = ctl->xsize;
     if (vy1 > ctl->ysize) vy1 = ctl->ysize;
     int sum = 0;
-    for (int h = layer; h <= ctl->top; h++) {
+    for (int h = layer; h <= layerend; h++) {
         debug("h:%d\n", h);
         SHEET *sht = ctl->sheets[h]; // sheet on current layer
 //        int sid = h + 1;
@@ -193,7 +195,7 @@ void sheet_refresh_base(SHTCTL *ctl,
         int sht_x0 = sht->vx0;
         if (sht_x0 < vx0) { // left
             bx0 = vx0;
-        } else if (sht_x0 >= vx0 && sht_x0 <= vx1) { // middle
+        } else if (vx0 <= sht_x0 && sht_x0 <= vx1) { // middle
             bx0 = sht_x0;
         } else if (sht_x0 > vx1) { // right
             // not overlap`
@@ -214,7 +216,8 @@ void sheet_refresh_base(SHTCTL *ctl,
 
         int sht_y0 = sht->vy0;
         by0 = (sht_y0 < vy0) * vy0 +
-              (vy0 <= sht_y0 && sht_y0 <= vy1) * sht_y0;
+              (vy0 <= sht_y0 && sht_y0 <= vy1) * sht_y0 +
+              (sht_y0 > vy1) * -1;
         if (by0 == -1) continue;
 
         int sht_y1 = sht->vy0 + sht->bysize;
@@ -223,7 +226,7 @@ void sheet_refresh_base(SHTCTL *ctl,
               (vy1 < sht_y1) * vy1;
         if (by1 == -1) continue;
 
-//        log_println("bx0:%d, by0:%d, bx1:%d, by1:%d", bx0, by0, bx1, by1);
+        log_println("bx0:%d, by0:%d, bx1:%d, by1:%d", bx0, by0, bx1, by1);
         for (int by = by0; by < by1; by++) {
             for (int bx = bx0; bx < bx1; bx++) {
                 int from = (by - sht->vy0) * sht->bxsize + (bx - sht->vx0);
@@ -232,6 +235,7 @@ void sheet_refresh_base(SHTCTL *ctl,
                 int to = by * ctl->xsize + bx;
 //                    map[to] = sid; // refresh
 //                }
+
                 refresh(ctl, sht, c, to);
 //                sum++;
             }
@@ -434,6 +438,37 @@ void sheet_refresh(SHEET *sht, int bx0, int by0, int bx1, int by1) {
     }
 }
 
+void show_block(const unsigned char *buf, int xsize, int ysize, unsigned char clo_inv) {
+    log_info("====================================\n");
+    for (int j = 0; j < ysize; ++j) {
+        for (int i = 0; i < xsize; ++i) {
+            unsigned char a = buf[i * xsize + j];
+            if (a == clo_inv)
+                log_info("%4c", '.');
+            else
+                log_info("%4d", a);
+        }
+        log_info("\n");
+    }
+}
+
+void show_sheet(SHEET *sht) {
+//    show_block(sht->buf, sht->bxsize, sht->bysize, sht->col_inv);
+    unsigned char *buf = sht->ctl->map;
+    int xsize = sht->ctl->xsize;
+    log_info("====================================\n");
+    for (int j = sht->vy0; j <= sht->vy0 + sht->bysize; ++j) {
+        for (int i = sht->vx0; i <= sht->vx0 + sht->bxsize; ++i) {
+            unsigned char a = buf[i * xsize + j];
+            if (a == sht->col_inv)
+                log_info("%4c", '.');
+            else
+                log_info("%4d", a);
+        }
+        log_info("\n");
+    }
+}
+
 void sheet_move(SHEET *sht, int vx0, int vy0) {
     SHTCTL *ctl = sht->ctl;
     int old_vx0 = sht->vx0;
@@ -443,12 +478,24 @@ void sheet_move(SHEET *sht, int vx0, int vy0) {
     sht->vy0 = vy0;
     if (sht->height >= 0) {
         //移动之后map要重新生成
-        sheet_refreshmap(ctl, old_vx0, old_vy0, old_vx0 + sht->bxsize, old_vy0 + sht->bysize, 0);
-        sheet_refreshmap(ctl, vx0, vy0, vx0 + sht->bxsize, vy0 + sht->bysize, sht->height);
+        log_println("sheet_move:old_vx0:%d, old_vy0:%d  -> vx0:%d, vy0:%d", old_vx0, old_vy0, vx0, vy0);
+        sheet_refreshmap(ctl, old_vx0, old_vy0,
+                         old_vx0 + sht->bxsize, old_vy0 + sht->bysize,
+                         0);
+        sheet_refreshmap(ctl, vx0, vy0,
+                         vx0 + sht->bxsize, vy0 + sht->bysize,
+                         sht->height);
         //sheet_refresh(ctl);
-        sheet_refreshsub(ctl, old_vx0, old_vy0, old_vx0 + sht->bxsize, old_vy0 + sht->bysize, 0, sht->height - 1);
-        sheet_refreshsub(ctl, vx0, vy0, vx0 + sht->bxsize, vy0 + sht->bysize, sht->height, sht->height);
-//        log_println("sheet_move:vx0:%d,vy0:%d", vx0, vy0);
+
+        sheet_refreshsub(ctl, old_vx0, old_vy0,
+                         old_vx0 + sht->bxsize, old_vy0 + sht->bysize,
+                         0, sht->height - 1);
+        sheet_refreshsub(ctl, vx0, vy0,
+                         vx0 + sht->bxsize, vy0 + sht->bysize,
+                         sht->height, sht->height);
+
+//        show_block(ctl->map, sht->bxsize, sht->bysize, sht->col_inv);
+//        show_sheet(sht);
     }
 }
 

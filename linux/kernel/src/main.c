@@ -81,7 +81,10 @@ void bootmain(void) {
     sheet_move(sht_back, 0, 0);
     sheet_updown(sht_back, 0);
 
+    log_println("background init done");
+
     // ----- window ----------
+    log_println("create window");
     SHEET *sht_win =create_window8_sheet(shtctl);
     sheet_updown(sht_win, 1);
     sheet_move(sht_win, 80, 72);

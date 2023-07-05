@@ -163,7 +163,10 @@ void mousebuf_deal(SHEET* mouse_sheet) {
         if (mouse_now_site_y > DISPLAY_Y_SIZE - 16) mouse_now_site_y = DISPLAY_Y_SIZE - 16;
 
         if (mouse_dec.x != 0 || mouse_dec.y != 0){
-            sheet_move(mouse_sheet, mouse_now_site_x, mouse_now_site_y);
+            int delay = 3;
+            if(mouse_now_site_x%delay==0||mouse_now_site_y%delay==0 ){
+                sheet_move(mouse_sheet, mouse_now_site_x, mouse_now_site_y);
+            }
         }
 //        log_println("mouse_now_site_x: %d :%d", mouse_now_site_x, mouse_now_site_y);
 //        getblock(mouse_now_site_x, mouse_now_site_y, 16, 16, mouse_screen_origin);
